@@ -1,0 +1,431 @@
+/**
+ * Export Choice UI
+ *
+ * Creates a user interface that allows users to choose between
+ * pushing tokens to GitHub or downloading them locally.
+ */
+
+import { ExtractionResult } from '../TokenExtractor';
+import { DocumentInfo } from '../types/CommonTypes';
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+export interface ExportChoice {
+  type: 'git-push' | 'download' | 'cancel';
+  gitConfig?: {
+    repository?: string;
+    commitMessage?: string;
+  };
+}
+
+export interface ExportChoiceUIOptions {
+  extractionResult: ExtractionResult;
+  documentInfo: DocumentInfo;
+  extractionDuration: number;
+  hasGitConfigured: boolean;
+  gitRepository?: string;
+}
+
+// =============================================================================
+// EXPORT CHOICE UI
+// =============================================================================
+
+export class ExportChoiceUI {
+  private options: ExportChoiceUIOptions;
+  private resolveChoice: ((choice: ExportChoice) => void) | null = null;
+
+  constructor(options: ExportChoiceUIOptions) {
+    this.options = options;
+  }
+
+  /**
+   * Show the export choice UI and wait for user selection
+   */
+  async showChoice(): Promise<ExportChoice> {
+    return new Promise((resolve) => {
+      this.resolveChoice = resolve;
+      this.createUI();
+      this.setupMessageHandling();
+    });
+  }
+
+  /**
+   * Create the choice UI HTML
+   */
+  private createUI(): void {
+    const { extractionResult, documentInfo, hasGitConfigured, gitRepository } = this.options;
+
+    const totalTokens = extractionResult.tokens.length + extractionResult.variables.length;
+    const fileSize = this.estimateFileSize();
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+
+          body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .header {
+            text-align: center;
+            margin-bottom: 24px;
+          }
+
+          .header h2 {
+            color: #1a1a1a;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+          }
+
+          .header p {
+            color: #666;
+            font-size: 14px;
+          }
+
+          .stats {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e5e5;
+          }
+
+          .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+          }
+
+          .stat-item {
+            text-align: center;
+          }
+
+          .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #18a0fb;
+            margin-bottom: 4px;
+          }
+
+          .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+          }
+
+          .choice-button {
+            background: white;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+          }
+
+          .choice-button:hover {
+            border-color: #18a0fb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 160, 251, 0.15);
+          }
+
+          .choice-button.primary {
+            background: linear-gradient(135deg, #18a0fb 0%, #0066cc 100%);
+            color: white;
+            border-color: #0066cc;
+          }
+
+          .choice-button.primary:hover {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            border-color: #0052a3;
+          }
+
+          .choice-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f5f5f5;
+          }
+
+          .choice-button.disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #e5e5e5;
+          }
+
+          .choice-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            vertical-align: middle;
+          }
+
+          .choice-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+          }
+
+          .choice-description {
+            font-size: 13px;
+            opacity: 0.8;
+            line-height: 1.4;
+          }
+
+          .choice-status {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.1);
+          }
+
+          .git-info {
+            background: #f0f7ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #0066cc;
+          }
+
+          .git-info.error {
+            background: #fff0f0;
+            border-color: #ffb3b3;
+            color: #cc0000;
+          }
+
+          .footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #e5e5e5;
+            text-align: center;
+          }
+
+          .cancel-btn {
+            background: none;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+          }
+
+          .cancel-btn:hover {
+            background: #f5f5f5;
+          }
+
+          .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+          }
+
+          .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #18a0fb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      </head>
+      <body>
+        <div id="main-content">
+          <div class="header">
+            <h2>🎉 Tokens Extracted Successfully!</h2>
+            <p>Choose how you'd like to export your design tokens</p>
+          </div>
+
+          <div class="stats">
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value">${totalTokens}</div>
+                <div class="stat-label">Total Tokens</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">${fileSize}</div>
+                <div class="stat-label">File Size</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="choices">
+            <div class="choice-button ${hasGitConfigured ? 'primary' : 'disabled'}" data-choice="git-push">
+              <div class="choice-status">${hasGitConfigured ? 'Ready' : 'Setup Required'}</div>
+              <div class="choice-icon">🚀</div>
+              <div class="choice-title">Push to GitHub</div>
+              <div class="choice-description">
+                ${hasGitConfigured
+                  ? `Push tokens directly to your repository and trigger automated processing`
+                  : 'Requires GitHub configuration - push tokens directly to repository'
+                }
+              </div>
+              ${hasGitConfigured && gitRepository ? `
+                <div class="git-info">
+                  📁 ${gitRepository} → tokens/raw/figma-tokens-${new Date().toISOString().split('T')[0]}.json
+                </div>
+              ` : ''}
+              ${!hasGitConfigured ? `
+                <div class="git-info error">
+                  ⚠️ GitHub integration not configured. Setup required before pushing.
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="choice-button" data-choice="download">
+              <div class="choice-status">Always Available</div>
+              <div class="choice-icon">💾</div>
+              <div class="choice-title">Download JSON File</div>
+              <div class="choice-description">
+                Download tokens as a JSON file to your computer for manual processing
+              </div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <button class="cancel-btn" onclick="handleCancel()">Cancel</button>
+          </div>
+        </div>
+
+        <div id="loading" class="loading">
+          <div class="spinner"></div>
+          <span id="loading-message">Processing...</span>
+        </div>
+
+        <script>
+          function showLoading(message) {
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading-message').textContent = message;
+          }
+
+          function handleChoice(choice) {
+            if (choice === 'git-push' && !${hasGitConfigured}) {
+              alert('GitHub integration is not configured yet. Please set up GitHub integration first or choose download option.');
+              return;
+            }
+
+            showLoading(choice === 'git-push' ? 'Pushing to GitHub...' : 'Preparing download...');
+
+            parent.postMessage({
+              pluginMessage: {
+                type: 'export-choice',
+                choice: choice,
+                data: {
+                  repository: '${gitRepository || ''}',
+                  commitMessage: 'Update design tokens from ${documentInfo.name}'
+                }
+              }
+            }, '*');
+          }
+
+          function handleCancel() {
+            parent.postMessage({
+              pluginMessage: {
+                type: 'export-choice',
+                choice: 'cancel'
+              }
+            }, '*');
+          }
+
+          // Add click handlers
+          document.querySelectorAll('.choice-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+              const choice = button.getAttribute('data-choice');
+              if (!button.classList.contains('disabled')) {
+                handleChoice(choice);
+              }
+            });
+          });
+        </script>
+      </body>
+      </html>
+    `;
+
+    figma.showUI(htmlContent, {
+      width: 500,
+      height: 600,
+      title: 'Export Design Tokens'
+    });
+  }
+
+  /**
+   * Setup message handling for UI interactions
+   */
+  private setupMessageHandling(): void {
+    figma.ui.onmessage = (msg) => {
+      if (msg.type === 'export-choice' && this.resolveChoice) {
+        const choice: ExportChoice = {
+          type: msg.choice,
+          gitConfig: msg.data
+        };
+
+        this.resolveChoice(choice);
+        this.resolveChoice = null;
+      }
+    };
+  }
+
+  /**
+   * Estimate JSON file size
+   */
+  private estimateFileSize(): string {
+    const { extractionResult } = this.options;
+
+    // Rough estimation based on token counts
+    const tokenCount = extractionResult.tokens.length + extractionResult.variables.length;
+    const estimatedBytes = tokenCount * 200 + 5000; // Rough estimate
+
+    if (estimatedBytes < 1024) {
+      return `${estimatedBytes} B`;
+    } else if (estimatedBytes < 1024 * 1024) {
+      return `${(estimatedBytes / 1024).toFixed(1)} KB`;
+    } else {
+      return `${(estimatedBytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+  }
+
+  /**
+   * Close the UI
+   */
+  close(): void {
+    figma.closePlugin();
+  }
+}

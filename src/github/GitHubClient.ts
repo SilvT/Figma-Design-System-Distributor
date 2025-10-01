@@ -1,0 +1,497 @@
+/**
+ * GitHub API Client for Figma Plugin
+ *
+ * Handles all GitHub API interactions within Figma's plugin environment.
+ * Supports Personal Access Token authentication and provides methods
+ * for repository operations, file management, and user authentication.
+ */
+
+import {
+  GitHubCredentials,
+  GitHubConfig,
+  GitHubUser,
+  GitHubRepository,
+  GitHubFile,
+  ConnectionTestResult,
+  CreateFileRequest,
+  UpdateFileRequest,
+  TokenPushRequest,
+  TokenPushResult,
+  GitHubError
+} from './GitHubTypes';
+
+// =============================================================================
+// GITHUB API CLIENT
+// =============================================================================
+
+export class GitHubClient {
+  private baseUrl = 'https://api.github.com';
+  private credentials: GitHubCredentials;
+  private readonly clientId: string;
+
+  constructor(credentials: GitHubCredentials) {
+    // Generate unique ID for this client instance
+    this.clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    console.log('🔧 GitHubClient constructor - Creating new client with ID:', this.clientId);
+    console.log('🔧 GitHubClient constructor - Called with:', { token: credentials.token.substring(0, 10) + '...', username: credentials.username });
+    this.credentials = credentials;
+
+    // Test arrow function methods immediately after assignment
+    this.validateArrowFunctionMethods();
+
+    console.log('🔧 GitHubClient constructor - Completed initialization for client:', this.clientId);
+  }
+
+  /**
+   * Validate that arrow function methods are properly assigned
+   */
+  private validateArrowFunctionMethods(): void {
+    console.log('🔍 GitHubClient - Validating arrow function methods...');
+
+    const arrowMethods = ['fileExists', 'createFile', 'updateFile', 'getFile', 'getRepository', 'testConnection', 'getUser'];
+
+    for (const methodName of arrowMethods) {
+      const method = (this as any)[methodName];
+      const methodType = typeof method;
+
+      console.log(`  📋 ${methodName}: ${methodType}`);
+
+      if (methodType !== 'function') {
+        console.error(`  ❌ CRITICAL: ${methodName} is not a function! Type: ${methodType}`);
+        continue;
+      }
+
+      try {
+        // Check if it's an arrow function
+        const methodSource = method.toString();
+        const isArrowFunction = methodSource.includes('=>');
+        const hasProperBinding = methodSource.includes('this.');
+
+        console.log(`    - Is arrow function: ${isArrowFunction}`);
+        console.log(`    - Has 'this' reference: ${hasProperBinding}`);
+        console.log(`    - Method length: ${method.length} parameters`);
+
+        // Test that the method can be called (with wrong args to avoid actual API calls)
+        const canBeCalled = typeof method.call === 'function';
+        console.log(`    - Can be called: ${canBeCalled}`);
+
+        if (isArrowFunction && hasProperBinding) {
+          console.log(`    ✅ ${methodName} appears correctly configured as arrow function`);
+        } else {
+          console.warn(`    ⚠️ ${methodName} may have binding issues`);
+        }
+
+      } catch (error) {
+        console.error(`    ❌ Error inspecting ${methodName}:`, error);
+      }
+    }
+
+    console.log('✅ Arrow function method validation completed');
+  }
+
+  /**
+   * Get client ID for debugging
+   */
+  getClientId(): string {
+    return this.clientId;
+  }
+
+  /**
+   * Make authenticated request to GitHub API
+   */
+  private async makeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    const defaultHeaders = {
+      'Authorization': `Bearer ${this.credentials.token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'Figma-Design-System-Distributor/1.0.0',
+      'Content-Type': 'application/json'
+    };
+
+    const config: RequestInit = {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers
+      }
+    };
+
+    // Enhanced logging for testing
+    console.log(`🌐 GitHub API Request: ${options.method || 'GET'} ${url}`);
+    console.log(`🔑 Token: ${this.credentials.token.substring(0, 10)}...`);
+
+    try {
+      const response = await fetch(url, config);
+
+      console.log(`📡 GitHub API Response: ${response.status} ${response.statusText}`);
+
+      if (!response.ok) {
+        await this.handleApiError(response);
+      }
+
+      // Handle 204 No Content responses
+      if (response.status === 204) {
+        console.log('✅ GitHub API: No content response (success)');
+        return {} as T;
+      }
+
+      const data = await response.json();
+      console.log(`✅ GitHub API: Response received (${JSON.stringify(data).length} chars)`);
+      return data as T;
+    } catch (error) {
+      console.error('❌ GitHub API Request failed:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(`GitHub API request failed: ${String(error)}`);
+    }
+  }
+
+  /**
+   * Handle GitHub API errors with detailed messaging
+   */
+  private async handleApiError(response: Response): Promise<never> {
+    let errorData: GitHubError;
+
+    try {
+      errorData = await response.json();
+    } catch {
+      errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
+    }
+
+    let errorMessage = errorData.message || 'Unknown GitHub API error';
+
+    // Enhance error messages based on status codes
+    switch (response.status) {
+      case 401:
+        errorMessage = 'Invalid GitHub token. Please check your Personal Access Token.';
+        break;
+      case 403:
+        if (errorMessage.includes('rate limit')) {
+          errorMessage = 'GitHub API rate limit exceeded. Please try again later.';
+        } else {
+          errorMessage = 'Insufficient permissions. Please check your token permissions and repository access.';
+        }
+        break;
+      case 404:
+        errorMessage = 'Repository not found or you don\'t have access to it.';
+        break;
+      case 422:
+        errorMessage = `Validation failed: ${errorData.message}`;
+        if (errorData.errors) {
+          const details = errorData.errors.map(e => `${e.field}: ${e.code}`).join(', ');
+          errorMessage += ` (${details})`;
+        }
+        break;
+    }
+
+    const error = new Error(errorMessage);
+    (error as any).status = response.status;
+    (error as any).githubError = errorData;
+    throw error;
+  }
+
+  // =============================================================================
+  // AUTHENTICATION & USER INFO
+  // =============================================================================
+
+  /**
+   * Get authenticated user information
+   */
+  getUser = async (): Promise<GitHubUser> => {
+    return this.makeRequest<GitHubUser>('/user');
+  }
+
+  /**
+   * Test connection and get comprehensive status
+   * Using arrow function to preserve context through minification
+   */
+  testConnection = async (repositoryConfig?: { owner: string; name: string }): Promise<ConnectionTestResult> => {
+    try {
+      // Test basic authentication
+      const user = await this.getUser();
+
+      const result: ConnectionTestResult = {
+        success: true,
+        user,
+        permissions: {
+          canRead: true,
+          canWrite: false,
+          canAdmin: false
+        }
+      };
+
+      // Test repository access if provided
+      if (repositoryConfig) {
+        try {
+          const repository = await this.getRepository(repositoryConfig.owner, repositoryConfig.name);
+
+          result.repository = repository;
+          result.permissions = {
+            canRead: true,
+            canWrite: repository.permissions?.push || false,
+            canAdmin: repository.permissions?.admin || false
+          };
+        } catch (repoError) {
+          result.success = false;
+          result.error = repoError instanceof Error ? repoError.message : 'Repository access failed';
+        }
+      }
+
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Connection test failed',
+        permissions: {
+          canRead: false,
+          canWrite: false,
+          canAdmin: false
+        }
+      };
+    }
+  }
+
+  // =============================================================================
+  // REPOSITORY OPERATIONS
+  // =============================================================================
+
+  /**
+   * Get repository information
+   */
+  getRepository = async (owner: string, repo: string): Promise<GitHubRepository> => {
+    return this.makeRequest<GitHubRepository>(`/repos/${owner}/${repo}`);
+  }
+
+  /**
+   * List user's repositories
+   */
+  async listRepositories(options: {
+    type?: 'owner' | 'collaborator' | 'organization_member';
+    sort?: 'created' | 'updated' | 'pushed' | 'full_name';
+    per_page?: number;
+  } = {}): Promise<GitHubRepository[]> {
+    const params = new URLSearchParams();
+
+    if (options.type) params.append('type', options.type);
+    if (options.sort) params.append('sort', options.sort);
+    if (options.per_page) params.append('per_page', options.per_page.toString());
+
+    const queryString = params.toString();
+    const endpoint = `/user/repos${queryString ? `?${queryString}` : ''}`;
+
+    return this.makeRequest<GitHubRepository[]>(endpoint);
+  }
+
+  // =============================================================================
+  // FILE OPERATIONS
+  // =============================================================================
+
+  /**
+   * Get file contents from repository
+   * Using arrow function to preserve context through minification
+   */
+  getFile = async (owner: string, repo: string, path: string, ref?: string): Promise<GitHubFile> => {
+    const params = ref ? `?ref=${encodeURIComponent(ref)}` : '';
+    return this.makeRequest<GitHubFile>(`/repos/${owner}/${repo}/contents/${path}${params}`);
+  }
+
+  /**
+   * Create a new file in repository
+   * Using arrow function to preserve context through minification
+   */
+  createFile = async (
+    owner: string,
+    repo: string,
+    path: string,
+    request: CreateFileRequest
+  ): Promise<{ content: GitHubFile; commit: any }> => {
+    console.log(`🔧 [${this.clientId}] createFile called - owner: ${owner}, repo: ${repo}, path: ${path}`);
+    console.log(`🔧 [${this.clientId}] createFile - 'this' context:`, !!this, `clientId: ${this.clientId}`);
+    console.log(`🔧 [${this.clientId}] createFile - request keys:`, Object.keys(request));
+
+    try {
+      const result = await this.makeRequest<{ content: GitHubFile; commit: any }>(`/repos/${owner}/${repo}/contents/${path}`, {
+        method: 'PUT',
+        body: JSON.stringify(request)
+      });
+      console.log(`✅ [${this.clientId}] createFile - success, commit SHA:`, result.commit?.sha);
+      return result;
+    } catch (error) {
+      console.error(`❌ [${this.clientId}] createFile - failed:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update existing file in repository
+   * Using arrow function to preserve context through minification
+   */
+  updateFile = async (
+    owner: string,
+    repo: string,
+    path: string,
+    request: UpdateFileRequest
+  ): Promise<{ content: GitHubFile; commit: any }> => {
+    return this.makeRequest<{ content: GitHubFile; commit: any }>(`/repos/${owner}/${repo}/contents/${path}`, {
+      method: 'PUT',
+      body: JSON.stringify(request)
+    });
+  }
+
+  /**
+   * Check if file exists in repository
+   * Using arrow function to preserve context through minification
+   */
+  fileExists = async (owner: string, repo: string, path: string): Promise<boolean> => {
+    console.log(`🔧 [${this.clientId}] fileExists called - owner: ${owner}, repo: ${repo}, path: ${path}`);
+    console.log(`🔧 [${this.clientId}] fileExists - 'this' context:`, !!this, `clientId: ${this.clientId}`);
+
+    try {
+      const result = await this.getFile(owner, repo, path);
+      console.log(`✅ [${this.clientId}] fileExists - file found, returning true`);
+      return true;
+    } catch (error) {
+      if ((error as any).status === 404) {
+        console.log(`📁 [${this.clientId}] fileExists - file not found (404), returning false`);
+        return false;
+      }
+      console.error(`❌ [${this.clientId}] fileExists - unexpected error:`, error);
+      throw error;
+    }
+  }
+
+  // =============================================================================
+  // TOKEN PUSH OPERATIONS
+  // =============================================================================
+
+  /**
+   * Push design tokens to GitHub repository
+   */
+  async pushTokens(request: TokenPushRequest): Promise<TokenPushResult> {
+    const { tokens, config, options = {} } = request;
+    const { repository, paths } = config;
+
+    try {
+      const result: TokenPushResult = {
+        success: false,
+        filesCreated: [],
+        filesUpdated: []
+      };
+
+      // Prepare file content
+      const tokenContent = JSON.stringify(tokens, null, 2);
+      const encodedContent = btoa(tokenContent);
+
+      // Generate commit message
+      const commitMessage = options.commitMessage ||
+        `Update design tokens from Figma - ${new Date().toISOString().split('T')[0]}`;
+
+      // Prepare file request
+      const fileRequest: CreateFileRequest | UpdateFileRequest = {
+        message: commitMessage,
+        content: encodedContent,
+        branch: options.branchName || repository.branch || 'main'
+      };
+
+      // Check if file exists
+      const fileExists = await this.fileExists(repository.owner, repository.name, paths.rawTokens);
+
+      if (fileExists) {
+        // Update existing file
+        const existingFile = await this.getFile(repository.owner, repository.name, paths.rawTokens);
+        (fileRequest as UpdateFileRequest).sha = existingFile.sha;
+
+        const updateResult = await this.updateFile(
+          repository.owner,
+          repository.name,
+          paths.rawTokens,
+          fileRequest as UpdateFileRequest
+        );
+
+        result.commitSha = updateResult.commit.sha;
+        result.filesUpdated.push(paths.rawTokens);
+      } else {
+        // Create new file
+        const createResult = await this.createFile(
+          repository.owner,
+          repository.name,
+          paths.rawTokens,
+          fileRequest
+        );
+
+        result.commitSha = createResult.commit.sha;
+        result.filesCreated.push(paths.rawTokens);
+      }
+
+      result.success = true;
+      return result;
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to push tokens',
+        filesCreated: [],
+        filesUpdated: []
+      };
+    }
+  }
+
+  // =============================================================================
+  // UTILITY METHODS
+  // =============================================================================
+
+  /**
+   * Validate token permissions
+   */
+  async validateTokenPermissions(): Promise<{
+    valid: boolean;
+    permissions: string[];
+    user?: GitHubUser;
+    error?: string;
+  }> {
+    try {
+      const user = await this.getUser();
+
+      // Try to get user repositories to test repo access
+      await this.listRepositories({ per_page: 1 });
+
+      return {
+        valid: true,
+        permissions: ['user', 'repo'], // Basic permissions we can verify
+        user
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        permissions: [],
+        error: error instanceof Error ? error.message : 'Token validation failed'
+      };
+    }
+  }
+
+  /**
+   * Get rate limit information
+   */
+  async getRateLimit(): Promise<{
+    limit: number;
+    remaining: number;
+    reset: number;
+    used: number;
+  }> {
+    const response = await this.makeRequest<{
+      rate: {
+        limit: number;
+        remaining: number;
+        reset: number;
+        used: number;
+      };
+    }>('/rate_limit');
+
+    return response.rate;
+  }
+}
