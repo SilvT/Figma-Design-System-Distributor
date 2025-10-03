@@ -168,10 +168,15 @@ export class ExportWorkflow {
   ): Promise<ExportChoice> {
     const extractionDuration = Date.now() - new Date(extractionResult.metadata.extractedAt).getTime();
 
+    // Get existing GitHub configuration from storage
+    const authState = this.githubAuth.getState();
+    const existingConfig = authState.config;
+
     const uiOptions: UnifiedExportUIOptions = {
       extractionResult,
       documentInfo: this.documentInfo,
-      extractionDuration
+      extractionDuration,
+      existingGitConfig: existingConfig
     };
 
     const unifiedUI = new UnifiedExportUI(uiOptions);

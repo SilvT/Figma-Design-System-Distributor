@@ -1370,4 +1370,262 @@ Any Layer → Error Handler → User Notification + Console Logging + Diagnostic
 
 ---
 
+## October 3, 2025: UI Polish and Documentation Organization
+
+### Overview
+Focused on improving user experience in the GitHub Setup tab, adding user control over credential persistence, and organizing project documentation.
+
+### UI Enhancements
+
+#### 1. Token Creation Tooltip
+**Implementation**: Added "Learn more" link next to GitHub token input field
+
+**Technical Details**:
+- Tooltip pattern: overlay + centered popup
+- Click outside or X button to close
+- Smooth fade in/out transitions
+- Content: Step-by-step token creation guide
+
+**Files Modified**: `src/ui/UnifiedExportUI.ts`
+- Lines 683-820: Tooltip CSS styles
+- Lines 909-942: Token tooltip HTML
+- Lines 1019-1043: Show/hide functions
+- Lines 1395-1400: "Learn more" link integration
+
+#### 2. Smart Accordion Behavior
+**User Request**: Collapse validated accordions by default to reduce clutter
+
+**Logic Implemented**:
+```
+Token accordion:     Validated → Collapsed | Not validated → Expanded
+Repository accordion: Validated → Collapsed | Not validated → Expanded
+File Paths accordion: Always collapsed (optional settings)
+```
+
+**Benefits**:
+- Returning users see clean, collapsed interface
+- New users see only what needs attention
+- Better visual hierarchy and focus
+
+**Implementation**: Lines 951-991 in `UnifiedExportUI.ts`
+
+#### 3. Save Credentials Checkbox
+**Purpose**: Give users control over credential persistence
+
+**Features**:
+- Checkbox at bottom of Setup tab (outside accordions)
+- Default: checked (save credentials)
+- "Learn more" link opens security information tooltip
+- Helper text explaining encryption
+
+**Backend Logic**:
+```typescript
+if (saveCredentials) {
+  await SecureStorage.storeCredentials(config.credentials);
+  await SecureStorage.storeConfig(config);
+} else {
+  await SecureStorage.clearAll();
+}
+```
+
+**Security Tooltip Content**:
+- How credentials are stored (encrypted locally by Figma)
+- What happens when checked vs unchecked
+- Best practices (minimal permissions, token expiration)
+- Technical details about `figma.clientStorage`
+
+**Files Modified**: `src/ui/UnifiedExportUI.ts`
+- Lines 944-969: Security tooltip HTML
+- Lines 1045-1068: Tooltip show/hide functions
+- Lines 1174-1199: Updated `completeSetup()` function
+- Lines 1648-1663: Checkbox UI
+- Lines 1864-1889: Conditional storage in `handleCompleteSetup()`
+
+#### 4. Spacing Optimization
+**User Request**: Reduce scrolling in Setup tab UI
+
+**CSS Changes**:
+- `.github-setup` gap: 20px → 8px
+- `.setup-step` padding: 20px → 10px
+- `.step-header` margins: 16px → 8px
+- `.form-group` margin-bottom: 16px → 10px
+- Checkbox section margins: reduced to 8px
+- Button section margins: reduced to 10px
+
+**Result**: Significantly less scrolling, especially with all accordions expanded
+
+### Documentation Organization
+
+#### Problem
+Documentation scattered across root directory:
+- `GITHUB_TOKEN_GUIDANCE.md` in root (combined content for two tooltips)
+- `example-github-integration.ts` in root
+- Old debug logs (372KB) cluttering root
+
+#### Solution: Created `docs/` Folder Structure
+
+**New Files**:
+1. **`docs/TOKEN_CREATION_GUIDE.md`** - Content for token creation tooltip
+2. **`docs/CREDENTIAL_SECURITY.md`** - Content for security tooltip
+3. **`docs/README.md`** - Documentation index and organization
+4. **`docs/example-github-integration.ts`** - Moved from root
+
+**Files Removed**:
+- `GITHUB_TOKEN_GUIDANCE.md` (replaced by two separate files)
+- `www.figma.com-1759422108996.log` (120KB old debug log)
+- `www.figma.com-1759422543665.log` (252KB old debug log)
+
+**Benefits**:
+- ✅ Clean, professional root directory
+- ✅ Clear separation: user docs vs developer docs
+- ✅ All tooltip content in one organized location
+- ✅ Easy to find and update documentation
+- ✅ Better project structure for future contributors
+
+#### Final Project Structure
+```
+/
+├── docs/                      # NEW: All documentation
+│   ├── README.md             # Documentation index
+│   ├── TOKEN_CREATION_GUIDE.md
+│   ├── CREDENTIAL_SECURITY.md
+│   └── example-github-integration.ts
+├── LOGS/                      # Session logs (kept organized)
+│   ├── SESSION_LOG_2025-10-02.md
+│   ├── SESSION_LOG_2025-10-03.md
+│   └── PROJECT_DEVELOPMENT_LOG.md
+├── src/                       # Source code
+├── build/                     # Build output
+├── README.md                  # Main project README
+└── ... (config files)
+```
+
+### Technical Patterns Established
+
+#### 1. Tooltip Pattern
+```typescript
+// Reusable pattern for inline help
+<span class="learn-more" onclick="showTooltip()">Learn more</span>
+
+// Overlay + popup structure
+<div class="tooltip-overlay" onclick="hideTooltip()"></div>
+<div class="tooltip-popup">
+  <div class="tooltip-header">
+    <h3>Title</h3>
+    <button class="tooltip-close" onclick="hideTooltip()">×</button>
+  </div>
+  <div class="tooltip-content">
+    <!-- Content here -->
+  </div>
+</div>
+
+// Show/hide functions exposed globally
+window.showTooltip = showTooltip;
+window.hideTooltip = hideTooltip;
+```
+
+#### 2. Conditional Storage Pattern
+```typescript
+// User choice controls data persistence
+const shouldSave = checkbox.checked;
+
+if (shouldSave) {
+  await SecureStorage.storeCredentials(credentials);
+} else {
+  await SecureStorage.clearAll();
+}
+```
+
+#### 3. Smart UI State Management
+```typescript
+// Collapse validated sections on load
+document.addEventListener('DOMContentLoaded', function() {
+  if (validationStates.token) {
+    tokenContent.classList.add('collapsed');
+    tokenArrow.classList.add('collapsed');
+  }
+  // ... similar for other accordions
+});
+```
+
+### Build History (October 3)
+- 22:23: Token tooltip implementation ✅
+- 22:30: Smart accordion behavior ✅
+- 23:47: Save credentials checkbox ✅
+- 23:52: Moved checkbox outside accordions ✅
+- 23:55: First spacing optimization pass ✅
+- 23:58: Final spacing optimization ✅
+- 00:05: Documentation cleanup and organization ✅
+
+### User Experience Improvements Summary
+
+**Before**:
+- No inline help for token creation
+- All accordions always expanded → excessive scrolling
+- No control over credential persistence
+- Documentation scattered in root directory
+
+**After**:
+- ✅ Contextual tooltips with detailed guidance
+- ✅ Smart accordion collapse based on validation state
+- ✅ User control over credential storage with security information
+- ✅ Organized documentation structure in `docs/` folder
+- ✅ Significantly reduced UI scrolling
+- ✅ Clean, professional project structure
+
+### Impact on User Workflow
+
+**New User Experience**:
+1. Open plugin → GitHub Setup tab
+2. See expanded Token and Repository accordions (need attention)
+3. Click "Learn more" for token creation guidance
+4. Fill in credentials with real-time validation
+5. Validated sections auto-collapse (clean interface)
+6. Review "Save credentials" checkbox with security info
+7. Complete setup with confidence
+
+**Returning User Experience**:
+1. Open plugin → GitHub Setup tab
+2. See all accordions collapsed (clean interface)
+3. Configuration already loaded and ready
+4. No need to scroll or search
+5. Export options immediately visible
+
+### Lessons Learned
+
+#### UI/UX Insights
+1. **Progressive Disclosure**: Hiding completed steps reduces cognitive load
+2. **Inline Help**: Contextual tooltips better than separate documentation windows
+3. **User Control**: Giving users choice over persistence increases trust
+4. **Visual Hierarchy**: Smart spacing and collapsing creates better focus
+
+#### Technical Insights
+1. **Tooltip Pattern Reusability**: Same pattern used for two different tooltips successfully
+2. **Global Function Exposure**: `window.functionName` pattern works reliably for `onclick` handlers
+3. **Spacing Impact**: Small margin/padding reductions (4-8px) significantly improve scrolling
+4. **State-Based UI**: Checking validation state on load creates smarter interface
+
+#### Documentation Insights
+1. **Organized Structure**: `docs/` folder much clearer than root-level files
+2. **Separate Concerns**: User docs vs developer docs in separate files
+3. **Content Alignment**: Tooltip content files match exact UI implementation
+4. **Maintenance**: Easier to update tooltip content when it's in dedicated markdown files
+
+### Maintenance Notes
+
+**Updating Tooltip Content**:
+1. Edit `docs/TOKEN_CREATION_GUIDE.md` or `docs/CREDENTIAL_SECURITY.md`
+2. Update corresponding HTML in `UnifiedExportUI.ts` tooltip sections
+3. Rebuild plugin: `npm run build`
+
+**Future Tooltip Additions**:
+1. Follow established pattern: overlay + popup + show/hide functions
+2. Create corresponding `.md` file in `docs/`
+3. Add "Learn more" link in UI
+4. Expose functions globally via `window` object
+
+---
+
 *This document serves as the complete development history and architectural guide for the Figma Design System Distributor plugin. It should be consulted for understanding design decisions, debugging complex issues, and planning future enhancements.*
+
+*Last Updated: October 4, 2025*

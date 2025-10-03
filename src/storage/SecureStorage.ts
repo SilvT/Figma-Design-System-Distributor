@@ -29,78 +29,18 @@ const STORAGE_KEYS = {
 class SimpleEncryption {
   private static key = 'figma-github-plugin-2024';
 
-  /**
-   * Custom base64 encoder for Figma plugin environment
-   */
-  private static customBase64Encode(input: string): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    let result = '';
-    let i = 0;
-
-    while (i < input.length) {
-      const a = input.charCodeAt(i++);
-      const b = i < input.length ? input.charCodeAt(i++) : 0;
-      const c = i < input.length ? input.charCodeAt(i++) : 0;
-
-      const bitmap = (a << 16) | (b << 8) | c;
-
-      result += chars.charAt((bitmap >> 18) & 63);
-      result += chars.charAt((bitmap >> 12) & 63);
-      result += chars.charAt((bitmap >> 6) & 63);
-      result += chars.charAt(bitmap & 63);
-    }
-
-    // Add padding
-    const padding = input.length % 3;
-    if (padding === 1) {
-      result = result.slice(0, -2) + '==';
-    } else if (padding === 2) {
-      result = result.slice(0, -1) + '=';
-    }
-
-    return result;
-  }
-
-  /**
-   * Custom base64 decoder for Figma plugin environment
-   */
-  private static customBase64Decode(input: string): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    let result = '';
-    let i = 0;
-
-    // Remove padding
-    input = input.replace(/[^A-Za-z0-9+/]/g, '');
-
-    while (i < input.length) {
-      const encoded1 = chars.indexOf(input.charAt(i++));
-      const encoded2 = chars.indexOf(input.charAt(i++));
-      const encoded3 = chars.indexOf(input.charAt(i++));
-      const encoded4 = chars.indexOf(input.charAt(i++));
-
-      const bitmap = (encoded1 << 18) | (encoded2 << 12) | (encoded3 << 6) | encoded4;
-
-      result += String.fromCharCode((bitmap >> 16) & 255);
-      if (encoded3 !== 64) result += String.fromCharCode((bitmap >> 8) & 255);
-      if (encoded4 !== 64) result += String.fromCharCode(bitmap & 255);
-    }
-
-    return result;
-  }
-
   static encrypt(text: string): string {
     try {
-      // Simple XOR encryption with base64 encoding
+      // Simple XOR encryption - just store as hex to avoid encoding issues
       const encrypted = text
         .split('')
         .map((char, i) =>
-          String.fromCharCode(
-            char.charCodeAt(0) ^ this.key.charCodeAt(i % this.key.length)
-          )
+          char.charCodeAt(0) ^ this.key.charCodeAt(i % this.key.length)
         )
+        .map(code => code.toString(16).padStart(2, '0'))
         .join('');
 
-      return this.customBase64Encode(encrypted);
+      return encrypted;
     } catch (error) {
       console.error('Encryption failed:', error);
       throw new Error('Failed to encrypt data');
@@ -109,16 +49,16 @@ class SimpleEncryption {
 
   static decrypt(encryptedText: string): string {
     try {
-      const decoded = this.customBase64Decode(encryptedText);
-
-      return decoded
-        .split('')
-        .map((char, i) =>
-          String.fromCharCode(
-            char.charCodeAt(0) ^ this.key.charCodeAt(i % this.key.length)
-          )
+      // Decrypt from hex string
+      const pairs = encryptedText.match(/.{1,2}/g) || [];
+      const decrypted = pairs
+        .map(hex => parseInt(hex, 16))
+        .map((code, i) =>
+          String.fromCharCode(code ^ this.key.charCodeAt(i % this.key.length))
         )
         .join('');
+
+      return decrypted;
     } catch (error) {
       console.error('Decryption failed:', error);
       throw new Error('Failed to decrypt data');
