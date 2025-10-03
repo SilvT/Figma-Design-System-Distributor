@@ -90,7 +90,7 @@ export class UnifiedExportUI {
             font-size: 14px;
             line-height: 1.4;
             color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
             min-height: 100vh;
             padding: 20px;
           }
@@ -105,8 +105,8 @@ export class UnifiedExportUI {
           }
 
           .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #f9a8d4 0%, #d8b4fe 100%);
+            color: #4a1d5c;
             padding: 24px;
             text-align: center;
           }
@@ -165,9 +165,9 @@ export class UnifiedExportUI {
           }
 
           .tab.active {
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
-            background: rgba(102, 126, 234, 0.05);
+           color: #510081;
+    border-bottom: 2px solid #510081;
+    background: rgb(190 24 184 / 5%);
           }
 
           .tab:hover:not(.active) {
@@ -176,7 +176,7 @@ export class UnifiedExportUI {
 
           .tab-content {
             padding: 24px;
-            min-height: 400px;
+            min-height: 200px;
           }
 
           .tab-panel {
@@ -202,9 +202,9 @@ export class UnifiedExportUI {
           }
 
           .export-option:hover {
-            border-color: #667eea;
+            border-color: #510081;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            box-shadow: 0 8px 25px rgb(190 24 189 / 15%);
           }
 
           .export-option.disabled {
@@ -321,8 +321,8 @@ export class UnifiedExportUI {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: #667eea;
-            color: white;
+            background: #d7adf0;
+            color: black;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -332,7 +332,7 @@ export class UnifiedExportUI {
           }
 
           .step-number.completed {
-            background: #28a745;
+            background: #d4edda;
           }
 
           .step-title {
@@ -377,7 +377,7 @@ export class UnifiedExportUI {
 
           .form-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #d7adf0;
           }
 
           .form-input.validating {
@@ -415,14 +415,15 @@ export class UnifiedExportUI {
           }
 
           .btn-primary {
-            background: #667eea;
-            color: white;
+            background: #d7adf0;
+            color: #510081;
           }
 
           .btn-primary:hover {
-            background: #5a6fd8;
+            background: #9d174d;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);
+            color:white;
           }
 
           .btn-secondary {
@@ -431,11 +432,11 @@ export class UnifiedExportUI {
           }
 
           .btn-secondary:hover {
-            background: #5a6268;
+            background: #212426;
           }
 
           .btn-success {
-            background: #28a745;
+            background: #a855f7;
             color: white;
           }
 
@@ -453,7 +454,7 @@ export class UnifiedExportUI {
           .validation-success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border: 0px solid #c3e6cb;
           }
 
           .validation-error {
@@ -470,8 +471,8 @@ export class UnifiedExportUI {
 
           .actions {
             padding: 24px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            background: #fff ;
+            border-top: 0px solid #e9ecef;
             text-align: center;
           }
 
@@ -648,7 +649,7 @@ export class UnifiedExportUI {
           }
 
           .external-link {
-            color: #667eea;
+            color: #a000ff;
             text-decoration: none;
             font-weight: 500;
           }
@@ -658,7 +659,7 @@ export class UnifiedExportUI {
           }
 
           .btn-link {
-            background: #667eea;
+            background: #510081;
             color: white;
             padding: 8px 16px;
             border-radius: 6px;
@@ -670,7 +671,7 @@ export class UnifiedExportUI {
           }
 
           .btn-link:hover {
-            background: #5a6fd8;
+            background: #9d174d;
           }
 
           .validation-auto-note {
@@ -682,7 +683,7 @@ export class UnifiedExportUI {
 
           /* Learn More Tooltip Styles */
           .learn-more {
-            color: #667eea;
+            color: #510081;
             text-decoration: underline;
             cursor: pointer;
             font-size: 12px;
@@ -690,7 +691,7 @@ export class UnifiedExportUI {
           }
 
           .learn-more:hover {
-            color: #5a6fd8;
+            color: #9d174d;
           }
 
           .tooltip-overlay {
@@ -807,7 +808,7 @@ export class UnifiedExportUI {
             display: inline-block;
             margin-top: 12px;
             padding: 8px 16px;
-            background: #667eea;
+            background: #f9a8d4;
             color: white;
             text-decoration: none;
             border-radius: 6px;
@@ -857,7 +858,7 @@ export class UnifiedExportUI {
               <div class="export-options">
                 <div id="github-export-option" class="export-option ${isGitConfigured ? '' : 'disabled'}" onclick="${isGitConfigured ? 'selectExport(\'git-push\')' : 'switchTab(\'github-setup\')'}">
                   <div class="option-header">
-                    <div class="option-icon" style="background: #28a745; color: white;">🚀</div>
+                    <div class="option-icon" style="background: #d4edda; color: white;">🚀</div>
                     <div class="option-title">Push to GitHub</div>
                     <div class="option-status ${isGitConfigured ? 'status-ready' : 'status-setup-required'}">
                       ${isGitConfigured ? 'Ready' : 'Setup Required'}
@@ -876,7 +877,7 @@ export class UnifiedExportUI {
 
                 <div class="export-option" onclick="selectExport('download')">
                   <div class="option-header">
-                    <div class="option-icon" style="background: #667eea; color: white;">💾</div>
+                    <div class="option-icon" style="background:#d7adf0; color: white;">💾</div>
                     <div class="option-title">Download JSON File</div>
                     <div class="option-status status-available">Always Available</div>
                   </div>
@@ -897,13 +898,7 @@ export class UnifiedExportUI {
                 ${this.renderGitHubSetupSteps()}
               </div>
             </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-secondary" onclick="selectExport('cancel')">
-              Cancel
-            </button>
-          </div>
+          </div>   
         </div>
 
         <!-- Token Guidance Tooltip -->
@@ -962,7 +957,7 @@ export class UnifiedExportUI {
 
             <p style="margin-top: 12px;">When <strong>unchecked</strong>, you'll need to re-enter your credentials each time you use the plugin.</p>
 
-            <p style="margin-top: 16px; padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #667eea;">
+            <p style="margin-top: 16px; padding: 12px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #f9a8d4;">
               <strong>💡 Recommendation:</strong> Keep this checked for convenience. Your data is encrypted and only accessible to you within Figma.
             </p>
           </div>
@@ -1153,21 +1148,25 @@ export class UnifiedExportUI {
           function validateRepository() {
             const ownerInput = document.getElementById('repo-owner');
             const nameInput = document.getElementById('repo-name');
-            const owner = ownerInput.value;
-            const name = nameInput.value;
+            const branchInput = document.getElementById('repo-branch');
+            const owner = ownerInput.value.trim();
+            const name = nameInput.value.trim();
+            const branch = branchInput.value.trim() || 'main';
+
             if (!owner || !name) return;
 
             // Show validating state
             ownerInput.className = 'form-input validating';
             nameInput.className = 'form-input validating';
+            branchInput.className = 'form-input validating';
 
             const statusDiv = document.getElementById('repo-validation');
             statusDiv.style.display = 'block';
             statusDiv.className = 'validation-status validation-loading';
-            statusDiv.textContent = '🔄 Validating repository access...';
+            statusDiv.textContent = '🔄 Validating repository and branch access...';
 
             parent.postMessage({
-              pluginMessage: { type: 'validate-repository', owner, name }
+              pluginMessage: { type: 'validate-repository', owner, name, branch }
             }, '*');
           }
 
@@ -1266,19 +1265,28 @@ export class UnifiedExportUI {
               if (msg.type === 'repository-validation-result') {
                 const ownerInput = document.getElementById('repo-owner');
                 const nameInput = document.getElementById('repo-name');
+                const branchInput = document.getElementById('repo-branch');
                 const statusDiv = document.getElementById('repo-validation');
 
                 // Update input visual states
-                if (ownerInput && nameInput) {
+                if (ownerInput && nameInput && branchInput) {
                   const stateClass = msg.success ? 'valid' : 'invalid';
                   ownerInput.className = 'form-input ' + stateClass;
                   nameInput.className = 'form-input ' + stateClass;
+                  branchInput.className = 'form-input ' + stateClass;
                 }
 
                 if (statusDiv) {
                   statusDiv.style.display = 'block';
                   statusDiv.className = 'validation-status ' + (msg.success ? 'validation-success' : 'validation-error');
-                  statusDiv.textContent = msg.message;
+
+                  // Handle branch not found case with helpful link
+                  if (msg.branchNotFound && msg.owner && msg.name && msg.branch) {
+                    const branchesUrl = \`https://github.com/\${msg.owner}/\${msg.name}/branches\`;
+                    statusDiv.innerHTML = \`\${msg.message}<br><a href="\${branchesUrl}" target="_blank" class="external-link" style="font-size: 12px; margin-top: 8px; display: inline-block;">Go to repository branches to create '\${msg.branch}' →</a>\`;
+                  } else {
+                    statusDiv.textContent = msg.message;
+                  }
 
                   validationStates.repository = msg.success;
                   updateStepCompletion('repository-step', msg.success);
@@ -1294,6 +1302,11 @@ export class UnifiedExportUI {
                       completeButton.disabled = true;
                       completeButton.parentElement.querySelector('.form-help').textContent = 'Complete token and repository validation first';
                     }
+                  }
+
+                  // Update configured status card if validation successful
+                  if (msg.success && msg.owner && msg.name && msg.branch) {
+                    updateConfiguredStatusCard(msg.owner, msg.name, msg.branch);
                   }
                 }
               }
@@ -1331,6 +1344,67 @@ export class UnifiedExportUI {
             }
           }
 
+          function updateConfiguredStatusCard(owner, name, branch) {
+            // Update the repository and branch info in the configured status card
+            const repoInfoDiv = document.querySelector('[style*="Repository"]')?.parentElement;
+            if (repoInfoDiv) {
+              const repoPath = \`\${owner}/\${name}\`;
+              repoInfoDiv.innerHTML = \`
+                <div style="font-size: 13px; color: #155724; margin-bottom: 6px;">
+                  <strong>📁 Repository:</strong> \${repoPath}
+                </div>
+                <div style="font-size: 13px; color: #155724;">
+                  <strong>🌿 Branch:</strong> \${branch}
+                </div>
+              \`;
+            }
+          }
+
+          function resetSetup() {
+            if (!confirm('Are you sure you want to reset? This will clear all inputs and saved credentials.')) {
+              return;
+            }
+
+            // Clear all input fields
+            document.getElementById('github-token').value = '';
+            document.getElementById('repo-owner').value = '';
+            document.getElementById('repo-name').value = '';
+            document.getElementById('repo-branch').value = 'main';
+            document.getElementById('raw-tokens-path').value = 'tokens/raw/';
+            document.getElementById('commit-message').value = 'feat: update design tokens from Figma - {{timestamp}}';
+
+            // Clear validation states
+            validationStates.token = false;
+            validationStates.repository = false;
+
+            // Reset input visual states
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => input.className = 'form-input');
+
+            // Hide validation status divs
+            const statusDivs = document.querySelectorAll('.validation-status');
+            statusDivs.forEach(div => div.style.display = 'none');
+
+            // Reset step completion states
+            updateStepCompletion('token-step', false);
+            updateStepCompletion('repository-step', false);
+
+            // Reset Complete Setup button
+            const completeButton = document.querySelector('button[onclick="completeSetup()"]');
+            if (completeButton) {
+              completeButton.disabled = true;
+            }
+
+            // Clear storage
+            parent.postMessage({
+              pluginMessage: { type: 'clear-storage' }
+            }, '*');
+
+            updateExportOption();
+          }
+
+          window.resetSetup = resetSetup;
+
           // Auto-save form changes and trigger validation
           let tokenValidationTimer = null;
           let repoValidationTimer = null;
@@ -1362,15 +1436,17 @@ export class UnifiedExportUI {
                 }, 1000); // Wait 1 second after user stops typing
               }
 
-              // Auto-validate repository after both owner and name are filled
-              if (e.target.id === 'repo-owner' || e.target.id === 'repo-name') {
+              // Auto-validate repository after owner, name, or branch are filled
+              if (e.target.id === 'repo-owner' || e.target.id === 'repo-name' || e.target.id === 'repo-branch') {
                 const ownerInput = document.getElementById('repo-owner');
                 const nameInput = document.getElementById('repo-name');
+                const branchInput = document.getElementById('repo-branch');
                 const statusDiv = document.getElementById('repo-validation');
 
                 // Reset validation state when user modifies input
                 ownerInput.className = 'form-input';
                 nameInput.className = 'form-input';
+                branchInput.className = 'form-input';
                 if (statusDiv) {
                   statusDiv.style.display = 'none';
                 }
@@ -1396,7 +1472,7 @@ export class UnifiedExportUI {
 
     figma.showUI(htmlContent, {
       width: 640,
-      height: 720,
+      height: 800,
       themeColors: true
     });
   }
@@ -1438,7 +1514,7 @@ export class UnifiedExportUI {
                   <li class="scope-not-needed">Any admin or delete permissions</li>
                 </ul>
 
-                <p style="margin-top: 16px; padding: 12px; background: rgba(102, 126, 234, 0.08); border-radius: 6px; font-size: 13px; line-height: 1.5;">
+                <p style="margin-top: 16px; padding: 12px; background: rgba(249, 168, 212, 0.08); border-radius: 6px; font-size: 13px; line-height: 1.5;">
                   This plugin only needs to READ your repository structure and WRITE token files. No admin access required.
                 </p>
 
@@ -1663,14 +1739,20 @@ export class UnifiedExportUI {
       </div>
 
       <div class="setup-actions" style="margin-top: 10px; text-align: center;">
-        <button class="btn btn-primary" onclick="completeSetup()" ${this.validationStates.token && this.validationStates.repository ? '' : 'disabled'}>
+      <div class="form-help" style="margin-top: 4px; display:flex; flex-direction:column; margin-bottom: 4px; align-items:center;">
+        ${this.validationStates.token && this.validationStates.repository ?
+          'Configuration is ready to be saved' :
+          'Complete token and repository validation first'
+        }
+        </div>
+       <div class="action-buttons" style="display:flex; justify-content:center; gap:16px; align-items:flex-end;" > 
+       <button class="btn btn-secondary" style="height:fit-content;" onclick="resetSetup()">
+      Reset
+    </button>
+       <button class="btn btn-primary" style="width:fit-content; margin-top:4px;" onclick="completeSetup()" ${this.validationStates.token && this.validationStates.repository ? '' : 'disabled'}>
           Complete Setup
         </button>
-        <div class="form-help" style="margin-top: 4px;">
-          ${this.validationStates.token && this.validationStates.repository ?
-            'Configuration is ready to be saved' :
-            'Complete token and repository validation first'
-          }
+        </div>
         </div>
       </div>
     `;
@@ -1708,10 +1790,13 @@ export class UnifiedExportUI {
           await this.handleTokenValidation(msg.token);
           break;
         case 'validate-repository':
-          await this.handleRepositoryValidation(msg.owner, msg.name);
+          await this.handleRepositoryValidation(msg.owner, msg.name, msg.branch);
           break;
         case 'complete-setup':
           await this.handleCompleteSetup(msg.config, msg.saveCredentials);
+          break;
+        case 'clear-storage':
+          await this.handleClearStorage();
           break;
       }
     };
@@ -1790,9 +1875,10 @@ export class UnifiedExportUI {
     }
   }
 
-  private async handleRepositoryValidation(owner: string, name: string): Promise<void> {
+  private async handleRepositoryValidation(owner: string, name: string, branch?: string): Promise<void> {
     try {
-      console.log('🔍 Validating repository access:', `${owner}/${name}`);
+      const branchToValidate = branch || 'main';
+      console.log('🔍 Validating repository access:', `${owner}/${name}`, `branch: ${branchToValidate}`);
 
       // Basic input validation
       if (!owner || !name) {
@@ -1820,28 +1906,80 @@ export class UnifiedExportUI {
       // Test repository access
       const testResult = await testClient.testConnection({ owner, name });
 
-      if (testResult.success) {
-        console.log('✅ Repository validation successful');
-
-        // Store the repository config
-        if (!this.gitConfig.repository) this.gitConfig.repository = { owner: '', name: '', branch: 'main' };
-        this.gitConfig.repository.owner = owner;
-        this.gitConfig.repository.name = name;
-        this.validationStates.repository = true;
-
-        figma.ui.postMessage({
-          type: 'repository-validation-result',
-          success: true,
-          message: `✅ Repository access confirmed`,
-          permissions: testResult.permissions
-        });
-      } else {
+      if (!testResult.success) {
         console.log('❌ Repository validation failed:', testResult.error);
         this.validationStates.repository = false;
         figma.ui.postMessage({
           type: 'repository-validation-result',
           success: false,
-          message: testResult.error || 'Repository validation failed'
+          message: testResult.error || 'Repository validation failed',
+          owner,
+          name
+        });
+        return;
+      }
+
+      // Repository exists, now validate branch
+      console.log('✅ Repository access confirmed, validating branch...');
+
+      try {
+        // Try to get branch info from GitHub API
+        const branchCheckUrl = `https://api.github.com/repos/${owner}/${name}/branches/${branchToValidate}`;
+        const response = await fetch(branchCheckUrl, {
+          headers: {
+            'Authorization': `token ${this.gitConfig.credentials.token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'Figma-Design-System-Distributor'
+          }
+        });
+
+        if (response.ok) {
+          // Branch exists
+          console.log('✅ Branch validation successful');
+
+          // Store the repository config with branch
+          if (!this.gitConfig.repository) this.gitConfig.repository = { owner: '', name: '', branch: 'main' };
+          this.gitConfig.repository.owner = owner;
+          this.gitConfig.repository.name = name;
+          this.gitConfig.repository.branch = branchToValidate;
+          this.validationStates.repository = true;
+
+          figma.ui.postMessage({
+            type: 'repository-validation-result',
+            success: true,
+            message: `✅ Repository and branch '${branchToValidate}' access confirmed`,
+            permissions: testResult.permissions,
+            owner,
+            name,
+            branch: branchToValidate
+          });
+        } else if (response.status === 404) {
+          // Branch doesn't exist
+          console.log(`⚠️ Branch '${branchToValidate}' not found`);
+          this.validationStates.repository = false;
+
+          figma.ui.postMessage({
+            type: 'repository-validation-result',
+            success: false,
+            message: `⚠️ Branch '${branchToValidate}' doesn't exist in this repository`,
+            branchNotFound: true,
+            owner,
+            name,
+            branch: branchToValidate
+          });
+        } else {
+          throw new Error(`Branch validation failed: ${response.status} ${response.statusText}`);
+        }
+      } catch (branchError) {
+        console.error('❌ Branch validation error:', branchError);
+        this.validationStates.repository = false;
+        figma.ui.postMessage({
+          type: 'repository-validation-result',
+          success: false,
+          message: `Branch validation failed: ${branchError instanceof Error ? branchError.message : 'Unknown error'}`,
+          owner,
+          name,
+          branch: branchToValidate
         });
       }
 
@@ -1855,6 +1993,37 @@ export class UnifiedExportUI {
         success: false,
         message: `Validation failed: ${errorMessage}`
       });
+    }
+  }
+
+  /**
+   * Handle clearing storage - reset all credentials and config
+   */
+  private async handleClearStorage(): Promise<void> {
+    try {
+      console.log('🗑️ Clearing all stored data...');
+
+      await SecureStorage.clearAll();
+
+      // Reset internal state
+      this.gitConfig = {
+        credentials: { token: '', username: '' },
+        repository: { owner: '', name: '', branch: 'main' },
+        paths: { rawTokens: 'tokens/raw/', processedTokens: 'tokens/processed/' },
+        commitMessage: 'feat: update design tokens from Figma - {{timestamp}}'
+      };
+
+      this.validationStates = {
+        token: false,
+        repository: false
+      };
+
+      console.log('✅ Storage cleared successfully');
+      figma.notify('✅ Setup reset successfully');
+
+    } catch (error) {
+      console.error('❌ Error clearing storage:', error);
+      figma.notify('⚠️ Error resetting setup', { error: true });
     }
   }
 
