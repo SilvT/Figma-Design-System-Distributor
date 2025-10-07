@@ -653,10 +653,26 @@ export class PRWorkflowUI {
 
   /**
    * Estimate file size from token data
+   * Uses custom UTF-8 byte counting for Figma plugin environment
    */
   private estimateFileSize(tokenData: ExtractionResult): string {
     const jsonString = JSON.stringify(tokenData, null, 2);
-    const bytes = new Blob([jsonString]).size;
+
+    // Calculate UTF-8 byte length (Blob/TextEncoder not available in Figma)
+    let bytes = 0;
+    for (let i = 0; i < jsonString.length; i++) {
+      const code = jsonString.charCodeAt(i);
+      if (code < 0x80) {
+        bytes += 1;
+      } else if (code < 0x800) {
+        bytes += 2;
+      } else if ((code & 0xFC00) === 0xD800) {
+        bytes += 4;
+        i++; // Skip low surrogate
+      } else {
+        bytes += 3;
+      }
+    }
 
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
