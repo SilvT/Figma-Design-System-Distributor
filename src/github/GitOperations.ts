@@ -642,6 +642,145 @@ export class GitOperations {
   }
 
   // =============================================================================
+  // BRANCH OPERATIONS
+  // =============================================================================
+
+  /**
+   * Create a new branch from the default branch
+   */
+  async createBranch(
+    repository: RepositoryConfig,
+    branchName: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      ClientTracker.log('GitOperations.createBranch - Starting', { repository, branchName });
+
+      if (!this.boundClient) {
+        throw new Error('GitHub bound client not initialized');
+      }
+
+      const { owner, name, branch: baseBranch = 'main' } = repository;
+
+      // Get the SHA of the base branch
+      console.log(`🌿 Getting SHA for base branch: ${baseBranch}`);
+      const baseRef = await this.getRef(owner, name, `heads/${baseBranch}`);
+      const baseSha = baseRef.object.sha;
+
+      console.log(`✅ Base branch SHA: ${baseSha}`);
+
+      // Create new branch reference
+      console.log(`🌿 Creating new branch: ${branchName}`);
+      await this.createRef(owner, name, `refs/heads/${branchName}`, baseSha);
+
+      console.log(`✅ Branch ${branchName} created successfully`);
+      ClientTracker.log('GitOperations.createBranch - Success');
+
+      return { success: true };
+
+    } catch (error) {
+      ClientTracker.log('❌ GitOperations.createBranch - Failed', error);
+      console.error('❌ Failed to create branch:', error);
+
+      return {
+        success: false,
+        error: this.parseGitError(error)
+      };
+    }
+  }
+
+  /**
+   * Push token file to a specific branch
+   */
+  async pushToBranch(
+    repository: RepositoryConfig,
+    branchName: string,
+    fileConfig: TokenFileConfig,
+    progressCallback?: ProgressCallback
+  ): Promise<PushResult> {
+    try {
+      console.log(`🚀 Pushing to branch: ${branchName}`);
+
+      // Use the regular pushTokenFile but override the branch
+      const branchRepository = {
+        ...repository,
+        branch: branchName
+      };
+
+      return await this.pushTokenFile(branchRepository, fileConfig, progressCallback);
+
+    } catch (error) {
+      console.error('❌ Failed to push to branch:', error);
+
+      return {
+        success: false,
+        operation: 'failed',
+        filePath: fileConfig.path,
+        error: this.parseGitError(error)
+      };
+    }
+  }
+
+  /**
+   * Get a Git reference (branch, tag, etc.)
+   */
+  private async getRef(owner: string, repo: string, ref: string): Promise<any> {
+    if (!this.boundClient) {
+      throw new Error('GitHub bound client not initialized');
+    }
+
+    const token = this.auth.getState().config?.credentials?.token;
+    if (!token) {
+      throw new Error('GitHub token not available');
+    }
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/git/refs/${ref}`;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get ref ${ref}: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  /**
+   * Create a Git reference (branch)
+   */
+  private async createRef(owner: string, repo: string, ref: string, sha: string): Promise<any> {
+    if (!this.boundClient) {
+      throw new Error('GitHub bound client not initialized');
+    }
+
+    const token = this.auth.getState().config?.credentials?.token;
+    if (!token) {
+      throw new Error('GitHub token not available');
+    }
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/git/refs`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ ref, sha })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to create ref ${ref}: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  // =============================================================================
   // COMMIT MESSAGE GENERATION
   // =============================================================================
 

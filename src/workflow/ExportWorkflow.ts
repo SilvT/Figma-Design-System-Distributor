@@ -12,6 +12,9 @@ import { GitHubSetupUI } from '../ui/GitHubSetupUI';
 import { TokenPushService } from '../github/TokenPushService';
 import { GitHubAuth } from '../github/GitHubAuth';
 import { TokenTransformer } from '../TokenTransformer';
+import { PRWorkflowUI, PRDetails, PRSuccess } from '../ui/PRWorkflowUI';
+import { PullRequestService } from '../github/PullRequestService';
+import { GitOperations, TokenFileConfig } from '../github/GitOperations';
 
 // =============================================================================
 // TYPES
@@ -41,12 +44,16 @@ export class ExportWorkflow {
   private documentInfo: DocumentInfo;
   private githubAuth: GitHubAuth;
   private pushService: TokenPushService;
+  private prService: PullRequestService;
+  private gitOps: GitOperations;
 
   constructor(options: WorkflowOptions) {
     this.tokenExtractor = options.tokenExtractor;
     this.documentInfo = options.documentInfo;
     this.githubAuth = GitHubAuth.getInstance();
     this.pushService = new TokenPushService();
+    this.prService = new PullRequestService();
+    this.gitOps = new GitOperations();
   }
 
   /**
@@ -114,6 +121,14 @@ export class ExportWorkflow {
       console.log('🐛 DEBUG: Initializing TokenPushService...');
       await this.pushService.initialize();
       console.log('🐛 DEBUG: TokenPushService initialized');
+
+      console.log('🐛 DEBUG: Initializing PullRequestService...');
+      await this.prService.initialize();
+      console.log('🐛 DEBUG: PullRequestService initialized');
+
+      console.log('🐛 DEBUG: Initializing GitOperations...');
+      await this.gitOps.initialize();
+      console.log('🐛 DEBUG: GitOperations initialized');
 
       // Verify the complete initialization chain
       if (this.githubAuth.hasClient()) {
@@ -212,114 +227,79 @@ export class ExportWorkflow {
   }
 
   /**
-   * Handle Git push workflow
+   * Handle Git push workflow using PR-based workflow
    */
   private async handleGitPush(
     extractionResult: ExtractionResult,
     choice: ExportChoice
   ): Promise<Omit<WorkflowResult, 'extractionResult' | 'duration'>> {
     try {
-      console.log('🐛 DEBUG: ExportWorkflow.handleGitPush() - START');
-      console.log('🐛 DEBUG: Choice has gitConfig:', !!choice.gitConfig);
-
-      // Log current state before any changes
-      const preState = this.githubAuth.getState();
-      console.log('🐛 DEBUG: Pre-configure GitHubAuth state:', {
-        isConfigured: preState.isConfigured,
-        isConnected: preState.isConnected,
-        hasConfig: !!preState.config,
-        hasClient: this.githubAuth.hasClient()
-      });
+      console.log('🐛 DEBUG: ExportWorkflow.handleGitPush() - Using PR Workflow');
 
       // Configure GitHub services with the provided configuration
       if (choice.gitConfig) {
-        console.log('🐛 DEBUG: Configuring with provided config:', {
-          hasToken: !!choice.gitConfig.credentials?.token,
-          tokenPreview: choice.gitConfig.credentials?.token?.substring(0, 10) + '...',
-          repository: choice.gitConfig.repository?.owner + '/' + choice.gitConfig.repository?.name
-        });
-
         const configResult = await this.githubAuth.configure(choice.gitConfig);
-        console.log('🐛 DEBUG: Configure result:', configResult);
-
         if (!configResult.success) {
           throw new Error(configResult.error || 'Failed to configure GitHub services');
         }
+      }
 
-        // Log state after configuration
-        const postState = this.githubAuth.getState();
-        console.log('🐛 DEBUG: Post-configure GitHubAuth state:', {
-          isConfigured: postState.isConfigured,
-          isConnected: postState.isConnected,
-          hasConfig: !!postState.config,
-          hasClient: this.githubAuth.hasClient()
+      // Get repository configuration
+      const repository = this.gitOps.getCurrentRepository();
+      if (!repository) {
+        throw new Error('No repository configured');
+      }
+
+      // Get base branch from config (default to 'main')
+      const config = this.githubAuth.getPublicConfig();
+      const baseBranch = config?.repository?.branch || 'main';
+
+      console.log('📝 Starting PR workflow...');
+      console.log('   Repository:', `${repository.owner}/${repository.name}`);
+      console.log('   Base branch:', baseBranch);
+
+      // Show PR workflow UI and wait for user confirmation
+      const prDetails = await new Promise<PRDetails | null>((resolve) => {
+        const prUI = new PRWorkflowUI({
+          tokenData: extractionResult,
+          defaultBranch: baseBranch,
+          onComplete: (details) => resolve(details),
+          onCancel: () => resolve(null)
         });
 
-      } else {
-        console.log('🐛 DEBUG: No gitConfig provided, using existing configuration');
-        const currentState = this.githubAuth.getState();
-        console.log('🐛 DEBUG: Current existing state:', {
-          isConfigured: currentState.isConfigured,
-          isConnected: currentState.isConnected,
-          hasConfig: !!currentState.config,
-          hasClient: this.githubAuth.hasClient()
-        });
-      }
+        prUI.show();
+      });
 
-      // Create feedback interface
-      const feedback = TokenPushService.createFigmaFeedback();
-      console.log('🐛 DEBUG: Feedback interface created');
-
-      // Verify client is available before push
-      console.log('🐛 DEBUG: Verifying client before push...');
-      try {
-        const client = this.githubAuth.getClient();
-        console.log('🐛 DEBUG: Client verified, ID:', client.getClientId());
-      } catch (clientError) {
-        console.error('🐛 DEBUG: Client verification failed:', clientError);
-        throw clientError;
-      }
-
-      // Use quick push or custom configuration
-      console.log('🐛 DEBUG: About to call pushService.quickPush...');
-      let pushResult;
-      try {
-        pushResult = await this.pushService.quickPush(extractionResult, feedback);
-        console.log('🐛 DEBUG: quickPush completed with result:', pushResult.success ? 'SUCCESS' : 'FAILED');
-      } catch (quickPushError) {
-        console.error('🐛 DEBUG: quickPush failed:', quickPushError);
-        console.error('🐛 DEBUG: quickPush error type:', typeof quickPushError);
-        console.error('🐛 DEBUG: quickPush error message:', quickPushError instanceof Error ? quickPushError.message : String(quickPushError));
-        console.error('🐛 DEBUG: quickPush error stack:', quickPushError instanceof Error ? quickPushError.stack : 'No stack trace');
-        throw quickPushError;
-      }
-
-      if (pushResult.success) {
-        console.log('🎉 Git push successful!');
-
-        // Show success details
-        const fileInfo = pushResult.fileInfo;
-        figma.notify(
-          `🎉 Pushed to GitHub! ${fileInfo?.path} (${fileInfo?.size})`,
-          { timeout: 5000 }
-        );
-
-        figma.closePlugin('Design tokens pushed to GitHub successfully!');
-
+      // User cancelled
+      if (!prDetails) {
+        console.log('👋 User cancelled PR workflow');
+        figma.notify('Pull request cancelled');
         return {
-          success: true,
-          choice: 'git-push',
-          gitResult: pushResult
+          success: false,
+          choice: 'cancel'
         };
-      } else {
-        throw new Error(pushResult.error || 'Git push failed');
       }
+
+      console.log('✅ User confirmed PR details:', {
+        branchName: prDetails.branchName,
+        prTitle: prDetails.prTitle
+      });
+
+      // Execute PR workflow
+      const prResult = await this.executePRWorkflow(
+        extractionResult,
+        repository,
+        prDetails,
+        baseBranch
+      );
+
+      return prResult;
 
     } catch (error) {
-      console.error('❌ Git push failed:', error);
+      console.error('❌ PR workflow failed:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'Git push failed';
-      figma.notify(`Git push failed: ${errorMessage}`, { error: true, timeout: 6000 });
+      const errorMessage = error instanceof Error ? error.message : 'PR workflow failed';
+      figma.notify(`PR creation failed: ${errorMessage}`, { error: true, timeout: 6000 });
 
       // Offer fallback to download
       const shouldFallback = await this.offerDownloadFallback();
@@ -333,6 +313,135 @@ export class ExportWorkflow {
         error: errorMessage
       };
     }
+  }
+
+  /**
+   * Execute the complete PR workflow: create branch, push tokens, create PR
+   */
+  private async executePRWorkflow(
+    extractionResult: ExtractionResult,
+    repository: any,
+    prDetails: PRDetails,
+    baseBranch: string
+  ): Promise<Omit<WorkflowResult, 'extractionResult' | 'duration'>> {
+    try {
+      // Step 1: Ensure branch name is unique
+      figma.notify('Creating branch...', { timeout: 2000 });
+      console.log('🌿 Ensuring unique branch name...');
+
+      const uniqueBranchName = await this.prService.generateUniqueBranchName(
+        repository,
+        prDetails.branchName
+      );
+
+      if (uniqueBranchName !== prDetails.branchName) {
+        console.log(`   Branch ${prDetails.branchName} exists, using ${uniqueBranchName}`);
+        prDetails.branchName = uniqueBranchName;
+      }
+
+      // Step 2: Create new branch
+      console.log(`🌿 Creating branch: ${prDetails.branchName}`);
+      const branchResult = await this.gitOps.createBranch(repository, prDetails.branchName);
+
+      if (!branchResult.success) {
+        throw new Error(branchResult.error || 'Failed to create branch');
+      }
+
+      console.log('✅ Branch created successfully');
+
+      // Step 3: Push tokens to new branch
+      figma.notify('Pushing tokens to branch...', { timeout: 2000 });
+      console.log(`📤 Pushing tokens to branch: ${prDetails.branchName}`);
+
+      const fileConfig: TokenFileConfig = {
+        path: 'tokens/raw/figma-tokens.json',
+        content: this.prepareTokenData(extractionResult),
+        message: prDetails.commitMessage
+      };
+
+      const pushResult = await this.gitOps.pushToBranch(
+        repository,
+        prDetails.branchName,
+        fileConfig
+      );
+
+      if (!pushResult.success) {
+        throw new Error(pushResult.error || 'Failed to push tokens');
+      }
+
+      console.log('✅ Tokens pushed successfully');
+
+      // Step 4: Create Pull Request
+      figma.notify('Creating pull request...', { timeout: 2000 });
+      console.log('📝 Creating pull request...');
+
+      const prResult = await this.prService.createPullRequest(
+        repository,
+        prDetails,
+        baseBranch
+      );
+
+      if (!prResult.success) {
+        throw new Error(prResult.error || 'Failed to create pull request');
+      }
+
+      console.log(`✅ Pull request #${prResult.prNumber} created!`);
+
+      // Step 5: Show success
+      const prSuccess: PRSuccess = {
+        prNumber: prResult.prNumber!,
+        prUrl: prResult.prUrl!,
+        branchName: prDetails.branchName
+      };
+
+      // Show success modal through PR workflow UI
+      const prUI = new PRWorkflowUI({
+        tokenData: extractionResult,
+        defaultBranch: baseBranch,
+        onComplete: () => {},
+        onCancel: () => {}
+      });
+      prUI.showSuccess(prSuccess);
+
+      return {
+        success: true,
+        choice: 'git-push',
+        gitResult: {
+          prNumber: prResult.prNumber,
+          prUrl: prResult.prUrl,
+          branchName: prDetails.branchName,
+          pushResult
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ PR workflow execution failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Prepare token data for GitHub push
+   */
+  private prepareTokenData(extractionResult: ExtractionResult): any {
+    const transformer = new TokenTransformer();
+
+    const rawData = {
+      metadata: {
+        sourceDocument: {
+          name: extractionResult.metadata.documentName
+        },
+        tokenCounts: {
+          totalTokens: extractionResult.tokens.length,
+          totalVariables: extractionResult.variables.length
+        }
+      },
+      variables: extractionResult.variables,
+      collections: extractionResult.collections,
+      designTokens: extractionResult.tokens
+    };
+
+    return transformer.transform(rawData);
   }
 
   /**
