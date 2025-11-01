@@ -8,6 +8,7 @@
 import { GitHubConfig } from '../github/GitHubTypes';
 import { GitHubClient } from '../github/GitHubClient';
 import { getSharedStyles } from './styles/theme';
+import { getWindowOptions } from './constants';
 
 
 export interface GitHubSetupOptions {
@@ -455,11 +456,7 @@ export class GitHubSetupUI {
       </html>
     `;
 
-    figma.showUI(htmlContent, {
-      width: 640,
-      height: 720,
-      themeColors: true
-    });
+    figma.showUI(htmlContent, getWindowOptions('GitHub Integration Setup'));
   }
 
   /**

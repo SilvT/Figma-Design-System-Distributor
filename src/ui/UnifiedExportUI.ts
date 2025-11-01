@@ -10,6 +10,7 @@ import { DocumentInfo } from '../types/CommonTypes';
 import { GitHubConfig } from '../github/GitHubTypes';
 import { GitHubClient } from '../github/GitHubClient';
 import { SecureStorage } from '../storage/SecureStorage';
+import { getWindowOptions } from './constants';
 
 // =============================================================================
 // TYPES
@@ -1476,11 +1477,7 @@ export class UnifiedExportUI {
       </html>
     `;
 
-    figma.showUI(htmlContent, {
-      width: 640,
-      height: 800,
-      themeColors: true
-    });
+    figma.showUI(htmlContent, getWindowOptions('Export Design Tokens'));
   }
 
   private renderSecurityGuidance(): string {
@@ -2100,4 +2097,5 @@ export class UnifiedExportUI {
       });
     }
   }
+
 }

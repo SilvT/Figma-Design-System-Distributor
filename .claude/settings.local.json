@@ -4,7 +4,8 @@
       "Bash(npm install:*)",
       "Read(//Users/silvia/Library/CloudStorage/Dropbox/marca_comercial/**)",
       "Bash(npm run build:*)",
-      "WebFetch(domain:www.figma.com)"
+      "WebFetch(domain:www.figma.com)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

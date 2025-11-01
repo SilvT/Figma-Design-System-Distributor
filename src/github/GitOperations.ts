@@ -16,6 +16,8 @@ import {
   BoundGitHubClient
 } from './GitHubTypes';
 
+import { log as debugLog } from '../config/logging';
+
 // =============================================================================
 // TYPES FOR GIT OPERATIONS
 // =============================================================================
@@ -74,15 +76,15 @@ export class GitOperations {
    */
   async initialize(): Promise<void> {
     ClientTracker.log('GitOperations.initialize - Starting');
-    console.log('🔧 GitOperations.initialize - Starting...');
+    debugLog.githubDebug('🔧 GitOperations.initialize - Starting...');
 
     await this.auth.initialize();
     ClientTracker.log('GitOperations.initialize - Auth initialized');
-    console.log('🔧 GitOperations.initialize - Auth initialized');
+    debugLog.githubDebug('🔧 GitOperations.initialize - Auth initialized');
 
     if (this.auth.hasClient()) {
       ClientTracker.log('GitOperations.initialize - Auth has client, getting it');
-      console.log('🔧 GitOperations.initialize - Auth has client, getting it...');
+      debugLog.githubDebug('🔧 GitOperations.initialize - Auth has client, getting it...');
 
       this.client = this.auth.getClient();
       this.boundClient = this.auth.createBoundClient();
@@ -95,34 +97,34 @@ export class GitOperations {
         clientId
       });
 
-      console.log('🔧 GitOperations.initialize - Client retrieved:', typeof this.client);
-      console.log('🔧 GitOperations.initialize - Bound client created:', typeof this.boundClient);
-      console.log('🔧 GitOperations.initialize - Client ID:', clientId);
-      console.log('🔧 GitOperations.initialize - Client prototype:', Object.getOwnPropertyNames(Object.getPrototypeOf(this.client || {})));
+      debugLog.githubDebug('🔧 GitOperations.initialize - Client retrieved: ' + typeof this.client);
+      debugLog.githubDebug('🔧 GitOperations.initialize - Bound client created: ' + typeof this.boundClient);
+      debugLog.githubDebug('🔧 GitOperations.initialize - Client ID: ' + clientId);
+      debugLog.githubDebug('🔧 GitOperations.initialize - Client prototype: ' + Object.getOwnPropertyNames(Object.getPrototypeOf(this.client || {})).join(', '));
 
       // Check specific methods with ClientTracker (without calling them)
       if (this.client) {
         ClientTracker.inspectObject('GitOperations.client', this.client);
         ClientTracker.inspectObject('GitOperations.boundClient', this.boundClient);
 
-        console.log('🔧 Available methods on client:');
-        console.log('  - fileExists:', typeof this.client.fileExists);
-        console.log('  - createFile:', typeof this.client.createFile);
-        console.log('  - updateFile:', typeof this.client.updateFile);
-        console.log('  - getFile:', typeof this.client.getFile);
-        console.log('  - getUser:', typeof this.client.getUser);
+        debugLog.githubDebug('🔧 Available methods on client:');
+        debugLog.githubDebug('  - fileExists: ' + typeof this.client.fileExists);
+        debugLog.githubDebug('  - createFile: ' + typeof this.client.createFile);
+        debugLog.githubDebug('  - updateFile: ' + typeof this.client.updateFile);
+        debugLog.githubDebug('  - getFile: ' + typeof this.client.getFile);
+        debugLog.githubDebug('  - getUser: ' + typeof this.client.getUser);
 
         // Additional debugging - check if methods exist at all
-        console.log('🔧 Instance properties:', Object.getOwnPropertyNames(this.client));
-        console.log('🔧 Instance methods in prototype:', Object.getOwnPropertyNames(Object.getPrototypeOf(this.client)));
+        debugLog.githubDebug('🔧 Instance properties: ' + Object.getOwnPropertyNames(this.client).join(', '));
+        debugLog.githubDebug('🔧 Instance methods in prototype: ' + Object.getOwnPropertyNames(Object.getPrototypeOf(this.client)).join(', '));
       }
     } else {
       ClientTracker.log('GitOperations.initialize - Auth does not have client');
-      console.log('🔧 GitOperations.initialize - Auth does not have client');
+      debugLog.githubDebug('🔧 GitOperations.initialize - Auth does not have client');
     }
 
     ClientTracker.log('GitOperations.initialize - Completed successfully');
-    console.log('🔧 GitOperations.initialize - Completed');
+    debugLog.githubDebug('🔧 GitOperations.initialize - Completed');
   }
 
   // =============================================================================
@@ -146,23 +148,23 @@ export class GitOperations {
       ClientTracker.traceMethodCall('boundClient', 'getRepository', this.boundClient);
       ClientTracker.traceMethodCall('boundClient', 'testConnection', this.boundClient);
 
-      console.log(`🔍 Validating repository: ${config.owner}/${config.name}`);
-      console.log('🔧 validateRepository - Using bound client:', typeof this.boundClient);
-      console.log('🔧 validateRepository - Bound client methods:');
-      console.log('  - getRepository:', typeof this.boundClient.getRepository);
-      console.log('  - testConnection:', typeof this.boundClient.testConnection);
+      debugLog.githubDebug(`🔍 Validating repository: ${config.owner}/${config.name}`);
+      debugLog.githubDebug('🔧 validateRepository - Using bound client: ' + typeof this.boundClient);
+      debugLog.githubDebug('🔧 validateRepository - Bound client methods:');
+      debugLog.githubDebug('  - getRepository: ' + typeof this.boundClient.getRepository);
+      debugLog.githubDebug('  - testConnection: ' + typeof this.boundClient.testConnection);
 
       // Use bound client directly - no context binding issues
       const boundClient = this.boundClient;
 
       // Test repository access using bound client
       ClientTracker.log('GitOperations.validateRepository - About to call getRepository');
-      console.log('🔧 About to call boundClient.getRepository...');
+      debugLog.githubDebug('🔧 About to call boundClient.getRepository...');
       let repository;
       try {
         repository = await boundClient.getRepository(config.owner, config.name);
         ClientTracker.log('GitOperations.validateRepository - getRepository SUCCESS', { name: repository.name });
-        console.log('✅ getRepository successful:', repository.name);
+        debugLog.githubDebug('✅ getRepository successful: ' + repository.name);
       } catch (getRepoError) {
         ClientTracker.log('GitOperations.validateRepository - getRepository FAILED', getRepoError);
         console.error('❌ getRepository failed:', getRepoError);
@@ -172,7 +174,7 @@ export class GitOperations {
 
       // Test user permissions using bound client
       ClientTracker.log('GitOperations.validateRepository - About to call testConnection');
-      console.log('🔧 About to call boundClient.testConnection...');
+      debugLog.githubDebug('🔧 About to call boundClient.testConnection...');
       let testResult;
       try {
         testResult = await boundClient.testConnection({
@@ -183,7 +185,7 @@ export class GitOperations {
           success: testResult.success,
           canWrite: testResult.permissions?.canWrite
         });
-        console.log('✅ testConnection successful:', testResult.success);
+        debugLog.githubDebug('✅ testConnection successful: ' + testResult.success);
       } catch (testConnError) {
         ClientTracker.log('GitOperations.validateRepository - testConnection FAILED', testConnError);
         console.error('❌ testConnection failed:', testConnError);
@@ -209,7 +211,7 @@ export class GitOperations {
         isValid: validation.isValid,
         canWrite: validation.canWrite
       });
-      console.log(`✅ Repository validation: ${validation.isValid ? 'PASSED' : 'FAILED'}`);
+      debugLog.githubDebug(`✅ Repository validation: ${validation.isValid ? 'PASSED' : 'FAILED'}`);
       return validation;
 
     } catch (error: any) {
@@ -266,9 +268,9 @@ export class GitOperations {
     progressCallback?: ProgressCallback
   ): Promise<PushResult> {
     try {
-      console.log('🚀 Starting pushTokenFile...');
-      console.log('📁 Repository:', repository);
-      console.log('📄 File config:', { path: fileConfig.path, messageLength: fileConfig.message?.length });
+      debugLog.githubDebug('🚀 Starting pushTokenFile...');
+      debugLog.githubDebug('📁 Repository: ' + JSON.stringify(repository));
+      debugLog.githubDebug('📄 File config: ' + JSON.stringify({ path: fileConfig.path, messageLength: fileConfig.message?.length }));
 
       // Comprehensive initialization check
       if (!this.isReady()) {
@@ -298,14 +300,14 @@ export class GitOperations {
         );
       }
 
-      console.log('🔧 pushTokenFile - Using bound client:', typeof this.boundClient);
-      console.log('🔧 pushTokenFile - Bound client methods available:');
-      console.log('  - fileExists:', typeof this.boundClient.fileExists);
-      console.log('  - createFile:', typeof this.boundClient.createFile);
-      console.log('  - updateFile:', typeof this.boundClient.updateFile);
-      console.log('  - getFile:', typeof this.boundClient.getFile);
+      debugLog.githubDebug('🔧 pushTokenFile - Using bound client: ' + typeof this.boundClient);
+      debugLog.githubDebug('🔧 pushTokenFile - Bound client methods available:');
+      debugLog.githubDebug('  - fileExists: ' + typeof this.boundClient.fileExists);
+      debugLog.githubDebug('  - createFile: ' + typeof this.boundClient.createFile);
+      debugLog.githubDebug('  - updateFile: ' + typeof this.boundClient.updateFile);
+      debugLog.githubDebug('  - getFile: ' + typeof this.boundClient.getFile);
 
-      console.log('✅ GitHub client is initialized');
+      debugLog.githubDebug('✅ GitHub client is initialized');
 
       const { owner, name, branch = 'main' } = repository;
       const { path, content, message } = fileConfig;
@@ -313,71 +315,71 @@ export class GitOperations {
       progressCallback?.('validation', 'Validating repository access...', 10);
 
       // Validate repository first
-      console.log('🔍 Validating repository...');
+      debugLog.githubDebug('🔍 Validating repository...');
       const repoValidation = await this.validateRepository(repository);
       if (!repoValidation.isValid) {
         throw new Error(repoValidation.error || 'Repository validation failed');
       }
-      console.log('✅ Repository validation passed');
+      debugLog.githubDebug('✅ Repository validation passed');
 
       progressCallback?.('preparation', 'Preparing file content...', 30);
 
       // Prepare file content
-      console.log('📝 Preparing file content...');
+      debugLog.githubDebug('📝 Preparing file content...');
       const jsonContent = JSON.stringify(content, null, 2);
 
       // Custom base64 encoding for Figma plugin environment
-      console.log('🔧 Encoding content to base64...');
+      debugLog.githubDebug('🔧 Encoding content to base64...');
       let encodedContent: string;
       try {
         // Try Node.js Buffer first (might be available in some environments)
         encodedContent = Buffer.from(jsonContent, 'utf8').toString('base64');
-        console.log('✅ Used Buffer for base64 encoding');
+        debugLog.githubDebug('✅ Used Buffer for base64 encoding');
       } catch (bufferError) {
-        console.warn('⚠️ Buffer not available, trying btoa...');
+        debugLog.githubDebug('⚠️ Buffer not available, trying btoa...');
         try {
           encodedContent = btoa(jsonContent);
-          console.log('✅ Used btoa for base64 encoding');
+          debugLog.githubDebug('✅ Used btoa for base64 encoding');
         } catch (btoaError) {
-          console.warn('⚠️ btoa not available, using custom base64 encoder...');
+          debugLog.githubDebug('⚠️ btoa not available, using custom base64 encoder...');
           // Custom base64 implementation for Figma plugin environment
           encodedContent = this.customBase64Encode(jsonContent);
-          console.log('✅ Used custom base64 encoding');
+          debugLog.githubDebug('✅ Used custom base64 encoding');
         }
       }
 
       // Calculate file size without Blob and TextEncoder (not available in Figma plugins)
-      console.log('🔧 Calculating file size...');
+      debugLog.githubDebug('🔧 Calculating file size...');
       let fileSize: number;
       try {
         // Try TextEncoder first (available in modern browsers)
         fileSize = new TextEncoder().encode(jsonContent).length;
-        console.log('✅ Used TextEncoder for file size calculation');
+        debugLog.githubDebug('✅ Used TextEncoder for file size calculation');
       } catch (textEncoderError) {
-        console.warn('⚠️ TextEncoder not available, using UTF-8 byte counting...');
+        debugLog.githubDebug('⚠️ TextEncoder not available, using UTF-8 byte counting...');
         // Custom UTF-8 byte counting for Figma plugin environment
         fileSize = this.getUTF8ByteLength(jsonContent);
-        console.log('✅ Used custom UTF-8 byte counting');
+        debugLog.githubDebug('✅ Used custom UTF-8 byte counting');
       }
-      console.log(`📊 File size: ${fileSize} bytes, encoded length: ${encodedContent.length}`);
+      debugLog.githubDebug(`📊 File size: ${fileSize} bytes, encoded length: ${encodedContent.length}`);
 
       // Generate commit message
       const commitMessage = message || this.generateCommitMessage(content);
-      console.log('💬 Commit message generated:', commitMessage.substring(0, 100) + '...');
+      debugLog.githubDebug('💬 Commit message generated: ' + commitMessage.substring(0, 100) + '...');
 
       progressCallback?.('checking', 'Checking if file exists...', 50);
 
       // Check if file already exists using bound client
       ClientTracker.log('GitOperations.pushTokenFile - About to check file existence');
-      console.log('🔍 Checking if file exists...');
-      console.log('🔧 About to call boundClient.fileExists');
+      debugLog.githubDebug('🔍 Checking if file exists...');
+      debugLog.githubDebug('🔧 About to call boundClient.fileExists');
 
       let fileExists: boolean;
       try {
         // Use bound client directly - no context issues
         ClientTracker.traceMethodCall('boundClient', 'fileExists', this.boundClient);
         ClientTracker.log('GitOperations.pushTokenFile - Executing fileExists', { owner, name, path });
-        console.log('🔧 About to execute boundClient.fileExists with parameters:', { owner, name, path });
+        debugLog.githubDebug('🔧 About to execute boundClient.fileExists with parameters: ' + JSON.stringify({ owner, name, path }));
 
         // Additional safety check at call time
         if (typeof this.boundClient.fileExists !== 'function') {
@@ -387,7 +389,7 @@ export class GitOperations {
         fileExists = await this.boundClient.fileExists(owner, name, path);
 
         ClientTracker.log('GitOperations.pushTokenFile - fileExists SUCCESS', { result: fileExists });
-        console.log(`📁 File exists: ${fileExists}`);
+        debugLog.githubDebug(`📁 File exists: ${fileExists}`);
       } catch (fileExistsError) {
         ClientTracker.log('❌ GitOperations.pushTokenFile - fileExists FAILED', fileExistsError);
         console.error('❌ Error checking file existence:', fileExistsError);
@@ -401,8 +403,8 @@ export class GitOperations {
       let result: PushResult;
 
       if (fileExists) {
-        console.log('🔄 Updating existing file...');
-        console.log('🔧 About to call updateExistingFile');
+        debugLog.githubDebug('🔄 Updating existing file...');
+        debugLog.githubDebug('🔧 About to call updateExistingFile');
         try {
           result = await this.updateExistingFile(owner, name, path, {
             message: commitMessage,
@@ -410,14 +412,14 @@ export class GitOperations {
             branch
           });
           result.operation = 'updated';
-          console.log('✅ File update completed');
+          debugLog.githubDebug('✅ File update completed');
         } catch (updateError) {
           console.error('❌ Error updating file:', updateError);
           throw new Error(`Failed to update file: ${updateError}`);
         }
       } else {
-        console.log('📄 Creating new file...');
-        console.log('🔧 About to call createNewFile');
+        debugLog.githubDebug('📄 Creating new file...');
+        debugLog.githubDebug('🔧 About to call createNewFile');
         try {
           result = await this.createNewFile(owner, name, path, {
             message: commitMessage,
@@ -425,7 +427,7 @@ export class GitOperations {
             branch
           });
           result.operation = 'created';
-          console.log('✅ File creation completed');
+          debugLog.githubDebug('✅ File creation completed');
         } catch (createError) {
           console.error('❌ Error creating file:', createError);
           throw new Error(`Failed to create file: ${createError}`);
@@ -437,7 +439,7 @@ export class GitOperations {
 
       progressCallback?.('complete', 'File pushed successfully!', 100);
 
-      console.log(`✅ File ${result.operation}: ${path} (${fileSize} bytes)`);
+      debugLog.githubDebug(`✅ File ${result.operation}: ${path} (${fileSize} bytes)`);
       return result;
 
     } catch (error) {
@@ -468,9 +470,9 @@ export class GitOperations {
   ): Promise<PushResult> {
     try {
       ClientTracker.log('GitOperations.createNewFile - Starting', { owner, repo, path });
-      console.log('🔧 createNewFile - Starting...');
-      console.log('🔧 createNewFile - Parameters:', { owner, repo, path });
-      console.log('🔧 createNewFile - Request keys:', Object.keys(request));
+      debugLog.githubDebug('🔧 createNewFile - Starting...');
+      debugLog.githubDebug('🔧 createNewFile - Parameters: ' + JSON.stringify({ owner, repo, path }));
+      debugLog.githubDebug('🔧 createNewFile - Request keys: ' + Object.keys(request).join(', '));
 
       if (!this.boundClient) {
         ClientTracker.log('❌ GitOperations.createNewFile - Bound client is null');
@@ -480,11 +482,11 @@ export class GitOperations {
       ClientTracker.inspectObject('createNewFile.boundClient', this.boundClient);
       ClientTracker.traceMethodCall('boundClient', 'createFile', this.boundClient);
 
-      console.log('🔧 createNewFile - Using bound client:', typeof this.boundClient);
-      console.log('🔧 createNewFile - boundClient.createFile:', typeof this.boundClient.createFile);
+      debugLog.githubDebug('🔧 createNewFile - Using bound client: ' + typeof this.boundClient);
+      debugLog.githubDebug('🔧 createNewFile - boundClient.createFile: ' + typeof this.boundClient.createFile);
 
       ClientTracker.log('GitOperations.createNewFile - About to call boundClient.createFile');
-      console.log('🚀 Calling boundClient.createFile...');
+      debugLog.githubDebug('🚀 Calling boundClient.createFile...');
 
       // Safety check at call time
       if (typeof this.boundClient.createFile !== 'function') {
@@ -495,7 +497,7 @@ export class GitOperations {
       try {
         response = await this.boundClient.createFile(owner, repo, path, request);
         ClientTracker.log('GitOperations.createNewFile - createFile SUCCESS', { responseType: typeof response });
-        console.log('✅ createFile response received:', typeof response);
+        debugLog.githubDebug('✅ createFile response received: ' + typeof response);
       } catch (callError) {
         ClientTracker.log('❌ GitOperations.createNewFile - createFile FAILED', callError);
         console.error('❌ Error during createFile call:', callError);
@@ -539,8 +541,8 @@ export class GitOperations {
   ): Promise<PushResult> {
     try {
       ClientTracker.log('GitOperations.updateExistingFile - Starting', { owner, repo, path });
-      console.log('🔧 updateExistingFile - Starting...');
-      console.log('🔧 updateExistingFile - Parameters:', { owner, repo, path });
+      debugLog.githubDebug('🔧 updateExistingFile - Starting...');
+      debugLog.githubDebug('🔧 updateExistingFile - Parameters: ' + JSON.stringify({ owner, repo, path }));
 
       if (!this.boundClient) {
         ClientTracker.log('❌ GitOperations.updateExistingFile - Bound client is null');
@@ -551,13 +553,13 @@ export class GitOperations {
       ClientTracker.traceMethodCall('boundClient', 'getFile', this.boundClient);
       ClientTracker.traceMethodCall('boundClient', 'updateFile', this.boundClient);
 
-      console.log('🔧 updateExistingFile - Using bound client:', typeof this.boundClient);
-      console.log('🔧 updateExistingFile - boundClient.getFile:', typeof this.boundClient.getFile);
-      console.log('🔧 updateExistingFile - boundClient.updateFile:', typeof this.boundClient.updateFile);
+      debugLog.githubDebug('🔧 updateExistingFile - Using bound client: ' + typeof this.boundClient);
+      debugLog.githubDebug('🔧 updateExistingFile - boundClient.getFile: ' + typeof this.boundClient.getFile);
+      debugLog.githubDebug('🔧 updateExistingFile - boundClient.updateFile: ' + typeof this.boundClient.updateFile);
 
       // Get current file to obtain SHA using bound client
       ClientTracker.log('GitOperations.updateExistingFile - About to call getFile for SHA');
-      console.log('🔍 Getting existing file for SHA...');
+      debugLog.githubDebug('🔍 Getting existing file for SHA...');
 
       // Safety check for getFile method
       if (typeof this.boundClient.getFile !== 'function') {
@@ -566,7 +568,7 @@ export class GitOperations {
 
       const existingFile = await this.boundClient.getFile(owner, repo, path);
       ClientTracker.log('GitOperations.updateExistingFile - getFile SUCCESS', { sha: existingFile.sha });
-      console.log('✅ Existing file retrieved, SHA:', existingFile.sha);
+      debugLog.githubDebug('✅ Existing file retrieved, SHA: ' + existingFile.sha);
 
       const updateRequest: UpdateFileRequest = {
         ...request,
@@ -574,7 +576,7 @@ export class GitOperations {
       };
 
       ClientTracker.log('GitOperations.updateExistingFile - About to call updateFile');
-      console.log('🚀 Calling boundClient.updateFile...');
+      debugLog.githubDebug('🚀 Calling boundClient.updateFile...');
 
       // Safety check for updateFile method
       if (typeof this.boundClient.updateFile !== 'function') {
@@ -585,7 +587,7 @@ export class GitOperations {
       try {
         response = await this.boundClient.updateFile(owner, repo, path, updateRequest);
         ClientTracker.log('GitOperations.updateExistingFile - updateFile SUCCESS', { responseType: typeof response });
-        console.log('✅ updateFile response received:', typeof response);
+        debugLog.githubDebug('✅ updateFile response received: ' + typeof response);
       } catch (callError) {
         ClientTracker.log('❌ GitOperations.updateExistingFile - updateFile FAILED', callError);
         console.error('❌ Error during updateFile call:', callError);
@@ -639,17 +641,17 @@ export class GitOperations {
       const { owner, name, branch: baseBranch = 'main' } = repository;
 
       // Get the SHA of the base branch
-      console.log(`🌿 Getting SHA for base branch: ${baseBranch}`);
+      debugLog.githubDebug(`🌿 Getting SHA for base branch: ${baseBranch}`);
       const baseRef = await this.getRef(owner, name, `heads/${baseBranch}`);
       const baseSha = baseRef.object.sha;
 
-      console.log(`✅ Base branch SHA: ${baseSha}`);
+      debugLog.githubDebug(`✅ Base branch SHA: ${baseSha}`);
 
       // Create new branch reference
-      console.log(`🌿 Creating new branch: ${branchName}`);
+      debugLog.githubDebug(`🌿 Creating new branch: ${branchName}`);
       await this.createRef(owner, name, `refs/heads/${branchName}`, baseSha);
 
-      console.log(`✅ Branch ${branchName} created successfully`);
+      debugLog.githubDebug(`✅ Branch ${branchName} created successfully`);
       ClientTracker.log('GitOperations.createBranch - Success');
 
       return { success: true };
@@ -675,7 +677,7 @@ export class GitOperations {
     progressCallback?: ProgressCallback
   ): Promise<PushResult> {
     try {
-      console.log(`🚀 Pushing to branch: ${branchName}`);
+      debugLog.githubDebug(`🚀 Pushing to branch: ${branchName}`);
 
       // Use the regular pushTokenFile but override the branch
       const branchRepository = {
@@ -719,7 +721,10 @@ export class GitOperations {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to get ref ${ref}: ${response.statusText}`);
+      const error: any = new Error(`Failed to get ref ${ref}: ${response.statusText}`);
+      error.status = response.status;
+      error.statusText = response.statusText;
+      throw error;
     }
 
     return await response.json();
@@ -751,7 +756,11 @@ export class GitOperations {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to create ref ${ref}: ${response.statusText} - ${errorText}`);
+      const error: any = new Error(`Failed to create ref ${ref}: ${response.statusText} - ${errorText}`);
+      error.status = response.status;
+      error.statusText = response.statusText;
+      error.responseBody = errorText;
+      throw error;
     }
 
     return await response.json();
@@ -779,7 +788,10 @@ export class GitOperations {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to list branches: ${response.statusText}`);
+      const error: any = new Error(`Failed to list branches: ${response.statusText}`);
+      error.status = response.status;
+      error.statusText = response.statusText;
+      throw error;
     }
 
     const branches = await response.json();
@@ -924,7 +936,7 @@ export class GitOperations {
    * Since neither Buffer nor btoa are available in Figma plugins
    */
   private customBase64Encode(input: string): string {
-    console.log('🔧 Using custom base64 encoder for Figma plugin environment');
+    debugLog.githubDebug('🔧 Using custom base64 encoder for Figma plugin environment');
 
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     let result = '';
@@ -959,7 +971,7 @@ export class GitOperations {
    * Since TextEncoder is not available in Figma plugins
    */
   private getUTF8ByteLength(str: string): number {
-    console.log('🔧 Calculating UTF-8 byte length using custom implementation');
+    debugLog.githubDebug('🔧 Calculating UTF-8 byte length using custom implementation');
 
     let byteLength = 0;
     for (let i = 0; i < str.length; i++) {
@@ -988,19 +1000,19 @@ export class GitOperations {
    * Check if client is ready for operations
    */
   isReady(): boolean {
-    console.log('🐛 DEBUG: GitOperations.isReady() - Checking readiness...');
+    debugLog.githubDebug('🐛 DEBUG: GitOperations.isReady() - Checking readiness...');
 
     // Always refresh client state in case auth was configured after initialization
     const authHasClient = this.auth.hasClient();
-    console.log('🐛 DEBUG: Auth hasClient:', authHasClient);
+    debugLog.githubDebug('🐛 DEBUG: Auth hasClient: ' + authHasClient);
 
     // If auth has client but we don't have bound client, refresh it
     if (authHasClient && !this.boundClient) {
-      console.log('🐛 DEBUG: Auth has client but bound client is null, refreshing...');
+      debugLog.githubDebug('🐛 DEBUG: Auth has client but bound client is null, refreshing...');
       try {
         this.client = this.auth.getClient();
         this.boundClient = this.auth.createBoundClient();
-        console.log('🐛 DEBUG: Successfully refreshed client and bound client');
+        debugLog.githubDebug('🐛 DEBUG: Successfully refreshed client and bound client');
       } catch (error) {
         console.error('🐛 DEBUG: Failed to refresh client:', error);
         return false;
@@ -1008,7 +1020,7 @@ export class GitOperations {
     }
 
     const isReady = this.boundClient !== null && authHasClient;
-    console.log('🐛 DEBUG: GitOperations.isReady() result:', isReady);
+    debugLog.githubDebug('🐛 DEBUG: GitOperations.isReady() result: ' + isReady);
     return isReady;
   }
 
@@ -1016,17 +1028,17 @@ export class GitOperations {
    * Get current repository configuration
    */
   getCurrentRepository(): RepositoryConfig | null {
-    console.log('🐛 DEBUG: GitOperations.getCurrentRepository() - Called');
+    debugLog.githubDebug('🐛 DEBUG: GitOperations.getCurrentRepository() - Called');
 
     const config = this.auth.getPublicConfig();
-    console.log('🐛 DEBUG: getPublicConfig() returned:', {
+    debugLog.githubDebug('🐛 DEBUG: getPublicConfig() returned: ' + JSON.stringify({
       hasConfig: !!config,
       hasRepository: !!config?.repository,
       repository: config?.repository ? `${config.repository.owner}/${config.repository.name}` : 'null'
-    });
+    }));
 
     if (!config?.repository) {
-      console.log('🐛 DEBUG: getCurrentRepository() - No repository config found, returning null');
+      debugLog.githubDebug('🐛 DEBUG: getCurrentRepository() - No repository config found, returning null');
       return null;
     }
 
@@ -1036,7 +1048,7 @@ export class GitOperations {
       branch: config.repository.branch || 'main'
     };
 
-    console.log('🐛 DEBUG: getCurrentRepository() - Returning:', result);
+    debugLog.githubDebug('🐛 DEBUG: getCurrentRepository() - Returning: ' + JSON.stringify(result));
     return result;
   }
 }

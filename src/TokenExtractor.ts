@@ -326,8 +326,9 @@ export class TokenExtractor {
         }
       };
 
-      // Count total nodes for progress tracking
-      this.totalNodes = this.countNodes(figma.root);
+      // In dynamic-page mode, we cannot count nodes without loading pages
+      // This would defeat the purpose of dynamic loading, so we set to 0
+      this.totalNodes = 0;
       result.metadata.totalNodes = this.totalNodes;
 
       // FIRST: Pre-populate variable registry to enable proper reference handling
@@ -1872,9 +1873,10 @@ export class TokenExtractor {
 
   /**
    * Log information
+   * Note: Disabled to reduce console clutter. Enable for debugging.
    */
   private log(message: string): void {
-    console.log(`[TokenExtractor] ${message}`);
+    // console.log(`[TokenExtractor] ${message}`);
   }
 }
 

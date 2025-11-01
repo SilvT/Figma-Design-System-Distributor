@@ -6,6 +6,7 @@
  */
 
 import { ExtractionResult } from '../TokenExtractor';
+import { getWindowOptions } from './constants';
 
 // =============================================================================
 // TYPES
@@ -655,7 +656,7 @@ export class PRWorkflowUI {
 </body>
 </html>`;
 
-    figma.showUI(html, { width: 600, height: 700, themeColors: true });
+    figma.showUI(html, getWindowOptions('Push Tokens to GitHub'));
   }
 
   // =============================================================================
@@ -803,7 +804,7 @@ export class PRWorkflowUI {
 </body>
 </html>`;
 
-    figma.showUI(html, { width: 500, height: 450, themeColors: true });
+    figma.showUI(html, getWindowOptions('Success'));
   }
 
   // =============================================================================

@@ -15,6 +15,7 @@ import { TokenTransformer } from '../TokenTransformer';
 import { PRWorkflowUI, PRDetails, PRSuccess } from '../ui/PRWorkflowUI';
 import { PullRequestService } from '../github/PullRequestService';
 import { GitOperations, TokenFileConfig } from '../github/GitOperations';
+import { ErrorHandler } from '../errors/ErrorHandler';
 
 // =============================================================================
 // TYPES
@@ -316,19 +317,27 @@ export class ExportWorkflow {
     } catch (error) {
       console.error('❌ PR workflow failed:', error);
 
-      const errorMessage = error instanceof Error ? error.message : 'PR workflow failed';
-      figma.notify(`PR creation failed: ${errorMessage}`, { error: true, timeout: 6000 });
+      // Handle error with comprehensive dialog
+      const errorResult = await ErrorHandler.handle({
+        error,
+        context: 'GitHub PR Workflow',
+        showDialog: true,
+        showTechnicalDetails: true,
+        onRetry: undefined, // Can't retry from here - would need to restart workflow
+        onFallback: async () => {
+          await this.handleDownload(extractionResult);
+        }
+      });
 
-      // Offer fallback to download
-      const shouldFallback = await this.offerDownloadFallback();
-      if (shouldFallback) {
+      // Check if user chose fallback
+      if (errorResult.dialogResult?.action === 'fallback') {
         return await this.handleDownload(extractionResult);
       }
 
       return {
         success: false,
         choice: 'git-push',
-        error: errorMessage
+        error: errorResult.metadata.userMessage
       };
     }
   }

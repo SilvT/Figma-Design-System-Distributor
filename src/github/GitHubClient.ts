@@ -19,6 +19,8 @@ import {
   GitHubError
 } from './GitHubTypes';
 
+import { log as debugLog } from '../config/logging';
+
 // =============================================================================
 // GITHUB API CLIENT
 // =============================================================================
@@ -31,14 +33,14 @@ export class GitHubClient {
   constructor(credentials: GitHubCredentials) {
     // Generate unique ID for this client instance
     this.clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    console.log('🔧 GitHubClient constructor - Creating new client with ID:', this.clientId);
-    console.log('🔧 GitHubClient constructor - Called with:', { token: credentials.token.substring(0, 10) + '...', username: credentials.username });
+    debugLog.githubDebug('🔧 GitHubClient constructor - Creating new client with ID: ' + this.clientId);
+    debugLog.githubDebug('🔧 GitHubClient constructor - Called with: ' + JSON.stringify({ token: credentials.token.substring(0, 10) + '...', username: credentials.username }));
     this.credentials = credentials;
 
     // Test arrow function methods immediately after assignment
     this.validateArrowFunctionMethods();
 
-    console.log('🔧 GitHubClient constructor - Completed initialization for client:', this.clientId);
+    debugLog.githubDebug('🔧 GitHubClient constructor - Completed initialization for client: ' + this.clientId);
   }
 
   /**
@@ -77,7 +79,7 @@ export class GitHubClient {
    * Validate that arrow function methods are properly assigned
    */
   private validateArrowFunctionMethods(): void {
-    console.log('🔍 GitHubClient - Validating arrow function methods...');
+    debugLog.githubDebug('🔍 GitHubClient - Validating arrow function methods...');
 
     const arrowMethods = ['fileExists', 'createFile', 'updateFile', 'getFile', 'getRepository', 'testConnection', 'getUser'];
 
@@ -85,7 +87,7 @@ export class GitHubClient {
       const method = (this as any)[methodName];
       const methodType = typeof method;
 
-      console.log(`  📋 ${methodName}: ${methodType}`);
+      debugLog.githubDebug(`  📋 ${methodName}: ${methodType}`);
 
       if (methodType !== 'function') {
         console.error(`  ❌ CRITICAL: ${methodName} is not a function! Type: ${methodType}`);
@@ -98,16 +100,16 @@ export class GitHubClient {
         const isArrowFunction = methodSource.includes('=>');
         const hasProperBinding = methodSource.includes('this.');
 
-        console.log(`    - Is arrow function: ${isArrowFunction}`);
-        console.log(`    - Has 'this' reference: ${hasProperBinding}`);
-        console.log(`    - Method length: ${method.length} parameters`);
+        debugLog.githubDebug(`    - Is arrow function: ${isArrowFunction}`);
+        debugLog.githubDebug(`    - Has 'this' reference: ${hasProperBinding}`);
+        debugLog.githubDebug(`    - Method length: ${method.length} parameters`);
 
         // Test that the method can be called (with wrong args to avoid actual API calls)
         const canBeCalled = typeof method.call === 'function';
-        console.log(`    - Can be called: ${canBeCalled}`);
+        debugLog.githubDebug(`    - Can be called: ${canBeCalled}`);
 
         if (isArrowFunction && hasProperBinding) {
-          console.log(`    ✅ ${methodName} appears correctly configured as arrow function`);
+          debugLog.githubDebug(`    ✅ ${methodName} appears correctly configured as arrow function`);
         } else {
           console.warn(`    ⚠️ ${methodName} may have binding issues`);
         }
@@ -117,7 +119,7 @@ export class GitHubClient {
       }
     }
 
-    console.log('✅ Arrow function method validation completed');
+    debugLog.githubDebug('✅ Arrow function method validation completed');
   }
 
   /**
@@ -152,13 +154,13 @@ export class GitHubClient {
     };
 
     // Enhanced logging for testing
-    console.log(`🌐 GitHub API Request: ${options.method || 'GET'} ${url}`);
-    console.log(`🔑 Token: ${this.credentials.token.substring(0, 10)}...`);
+    debugLog.githubDebug(`🌐 GitHub API Request: ${options.method || 'GET'} ${url}`);
+    debugLog.githubDebug(`🔑 Token: ${this.credentials.token.substring(0, 10)}...`);
 
     try {
       const response = await fetch(url, config);
 
-      console.log(`📡 GitHub API Response: ${response.status} ${response.statusText}`);
+      debugLog.githubDebug(`📡 GitHub API Response: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         await this.handleApiError(response);
@@ -166,12 +168,12 @@ export class GitHubClient {
 
       // Handle 204 No Content responses
       if (response.status === 204) {
-        console.log('✅ GitHub API: No content response (success)');
+        debugLog.githubDebug('✅ GitHub API: No content response (success)');
         return {} as T;
       }
 
       const data = await response.json();
-      console.log(`✅ GitHub API: Response received (${JSON.stringify(data).length} chars)`);
+      debugLog.githubDebug(`✅ GitHub API: Response received (${JSON.stringify(data).length} chars)`);
       return data as T;
     } catch (error) {
       console.error('❌ GitHub API Request failed:', error);
@@ -342,16 +344,16 @@ export class GitHubClient {
     path: string,
     request: CreateFileRequest
   ): Promise<{ content: GitHubFile; commit: any }> => {
-    console.log(`🔧 [${this.clientId}] createFile called - owner: ${owner}, repo: ${repo}, path: ${path}`);
-    console.log(`🔧 [${this.clientId}] createFile - 'this' context:`, !!this, `clientId: ${this.clientId}`);
-    console.log(`🔧 [${this.clientId}] createFile - request keys:`, Object.keys(request));
+    debugLog.githubDebug(`🔧 [${this.clientId}] createFile called - owner: ${owner}, repo: ${repo}, path: ${path}`);
+    debugLog.githubDebug(`🔧 [${this.clientId}] createFile - 'this' context: ${!!this}, clientId: ${this.clientId}`);
+    debugLog.githubDebug(`🔧 [${this.clientId}] createFile - request keys: ${Object.keys(request).join(', ')}`);
 
     try {
       const result = await this.makeRequest<{ content: GitHubFile; commit: any }>(`/repos/${owner}/${repo}/contents/${path}`, {
         method: 'PUT',
         body: JSON.stringify(request)
       });
-      console.log(`✅ [${this.clientId}] createFile - success, commit SHA:`, result.commit?.sha);
+      debugLog.githubDebug(`✅ [${this.clientId}] createFile - success, commit SHA: ${result.commit?.sha}`);
       return result;
     } catch (error) {
       console.error(`❌ [${this.clientId}] createFile - failed:`, error);
@@ -380,16 +382,16 @@ export class GitHubClient {
    * Using arrow function to preserve context through minification
    */
   fileExists = async (owner: string, repo: string, path: string): Promise<boolean> => {
-    console.log(`🔧 [${this.clientId}] fileExists called - owner: ${owner}, repo: ${repo}, path: ${path}`);
-    console.log(`🔧 [${this.clientId}] fileExists - 'this' context:`, !!this, `clientId: ${this.clientId}`);
+    debugLog.githubDebug(`🔧 [${this.clientId}] fileExists called - owner: ${owner}, repo: ${repo}, path: ${path}`);
+    debugLog.githubDebug(`🔧 [${this.clientId}] fileExists - 'this' context: ${!!this}, clientId: ${this.clientId}`);
 
     try {
       await this.getFile(owner, repo, path);
-      console.log(`✅ [${this.clientId}] fileExists - file found, returning true`);
+      debugLog.githubDebug(`✅ [${this.clientId}] fileExists - file found, returning true`);
       return true;
     } catch (error) {
       if ((error as any).status === 404) {
-        console.log(`📁 [${this.clientId}] fileExists - file not found (404), returning false`);
+        debugLog.githubDebug(`📁 [${this.clientId}] fileExists - file not found (404), returning false`);
         return false;
       }
       console.error(`❌ [${this.clientId}] fileExists - unexpected error:`, error);

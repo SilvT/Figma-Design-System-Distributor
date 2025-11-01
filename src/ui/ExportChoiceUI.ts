@@ -8,6 +8,7 @@
 import { ExtractionResult } from '../TokenExtractor';
 import { DocumentInfo } from '../types/CommonTypes';
 import { getSharedStyles } from './styles/theme';
+import { getWindowOptions } from './constants';
 
 // =============================================================================
 // TYPES
@@ -298,11 +299,7 @@ export class ExportChoiceUI {
       </html>
     `;
 
-    figma.showUI(htmlContent, {
-      width: 500,
-      height: 600,
-      title: 'Export Design Tokens'
-    });
+    figma.showUI(htmlContent, getWindowOptions('Export Design Tokens'));
   }
 
   /**
