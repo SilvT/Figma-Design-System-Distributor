@@ -42,7 +42,7 @@
     "id": "figma-design-system-distributor",
     "name": "Design System Distributor",
     "main": "src/main.ts",
-    "documentAccess": "dynamic-page",
+    "documentAccess": "current-page",
     "networkAccess": {
       "allowedDomains": [
         "https://api.github.com"
