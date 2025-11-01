@@ -7,6 +7,8 @@
 
 import { ExtractionResult } from '../TokenExtractor';
 import { getWindowOptions } from './constants';
+import { WorkflowTriggerConfig, WorkflowTriggerResult } from '../github/GitHubTypes';
+import { SecureStorage, WorkflowSettings } from '../storage/SecureStorage';
 
 // =============================================================================
 // TYPES
@@ -27,6 +29,7 @@ export interface PRDetails {
   prTitle?: string;
   prBody?: string;
   isNewBranch: boolean;
+  workflowTrigger?: WorkflowTriggerConfig;  // NEW: Optional workflow trigger config
 }
 
 export interface PRSuccess {
@@ -34,6 +37,7 @@ export interface PRSuccess {
   prUrl?: string;
   branchName: string;
   action: 'push-to-branch' | 'create-pr';
+  workflowTrigger?: WorkflowTriggerResult;  // NEW: Workflow trigger result
 }
 
 // =============================================================================
@@ -52,8 +56,8 @@ export class PRWorkflowUI {
   /**
    * Show the unified workflow
    */
-  show(): void {
-    this.showUnifiedModal();
+  async show(): Promise<void> {
+    await this.showUnifiedModal();
     this.setupMessageHandling();
   }
 
@@ -122,10 +126,16 @@ export class PRWorkflowUI {
   /**
    * Show unified single-step modal
    */
-  private showUnifiedModal(): void {
+  private async showUnifiedModal(): Promise<void> {
     const { tokenData } = this.options;
     const collections = tokenData.collections || [];
     const defaultBranch = this.options.defaultBranch || 'main';
+
+    // Load saved workflow settings
+    const workflowSettings = await SecureStorage.getWorkflowSettings() || {
+      workflowTriggerEnabled: false,
+      workflowFileName: 'transform-tokens.yml'
+    };
 
     const html = `
 <!DOCTYPE html>
@@ -544,6 +554,37 @@ export class PRWorkflowUI {
           </div>
         </div>
       </div>
+
+      <!-- Workflow Trigger Section -->
+      <div class="section" style="margin-top: 16px;">
+        <div class="form-group">
+          <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input
+              type="checkbox"
+              id="enable-workflow-trigger"
+              style="width: auto;"
+              ${workflowSettings.workflowTriggerEnabled ? 'checked' : ''}
+            >
+            <span>Trigger CI/CD workflow after push</span>
+          </label>
+        </div>
+
+        <div id="workflow-config" style="display: ${workflowSettings.workflowTriggerEnabled ? 'block' : 'none'}; margin-left: 24px; margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">Workflow file name</label>
+            <input
+              type="text"
+              class="form-input"
+              id="workflow-filename"
+              value="${workflowSettings.workflowFileName}"
+              placeholder="transform-tokens.yml"
+            >
+            <div style="font-size: 11px; color: #666; margin-top: 4px;">
+              File must exist in <code>.github/workflows/</code>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Actions -->
@@ -587,6 +628,18 @@ export class PRWorkflowUI {
           newTag.style.display = 'none';
         }
       });
+
+      // Handle workflow trigger checkbox
+      const workflowCheckbox = document.getElementById('enable-workflow-trigger');
+      const workflowConfig = document.getElementById('workflow-config');
+
+      workflowCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          workflowConfig.style.display = 'block';
+        } else {
+          workflowConfig.style.display = 'none';
+        }
+      });
     });
 
     function selectAction(action) {
@@ -620,13 +673,21 @@ export class PRWorkflowUI {
       const baseBranchValue = document.getElementById('base-branch').value;
       const actualBaseBranch = baseBranchValue === '__create_new__' ? 'main' : baseBranchValue;
 
+      // Get workflow trigger config
+      const workflowEnabled = document.getElementById('enable-workflow-trigger').checked;
+      const workflowFileName = document.getElementById('workflow-filename').value.trim();
+
       const details = {
         action: currentAction,
         branchName: document.getElementById('branch-name').value.trim(),
         baseBranch: actualBaseBranch,
         commitMessage: document.getElementById('commit-message').value.trim(),
         prTitle: document.getElementById('pr-title').value.trim(),
-        isNewBranch: isNewBranch
+        isNewBranch: isNewBranch,
+        workflowTrigger: workflowEnabled ? {
+          enabled: true,
+          workflowFileName: workflowFileName || 'transform-tokens.yml'
+        } : undefined
       };
 
       // Validation
@@ -642,6 +703,11 @@ export class PRWorkflowUI {
 
       if (currentAction === 'create-pr' && !details.prTitle) {
         alert('Please enter a PR title');
+        return;
+      }
+
+      if (workflowEnabled && !workflowFileName) {
+        alert('Please enter a workflow file name');
         return;
       }
 
@@ -785,11 +851,32 @@ export class PRWorkflowUI {
         <span class="detail-label">Branch</span>
         <span class="detail-value">${success.branchName}</span>
       </div>
+      ${success.workflowTrigger?.triggered ? `
+        <div class="detail-row">
+          <span class="detail-label">Workflow</span>
+          <span class="detail-value" style="color: ${success.workflowTrigger.success ? '#28a745' : '#dc3545'}">
+            ${success.workflowTrigger.success ? '✅ Triggered' : '⚠️ Failed'}
+          </span>
+        </div>
+      ` : ''}
     </div>
+
+    ${success.workflowTrigger?.triggered && !success.workflowTrigger.success ? `
+      <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 16px; text-align: left; border-radius: 4px;">
+        <div style="font-weight: 600; color: #856404; margin-bottom: 4px;">Workflow Trigger Warning</div>
+        <div style="font-size: 12px; color: #856404;">${success.workflowTrigger.error || 'Failed to trigger workflow'}</div>
+      </div>
+    ` : ''}
 
     ${success.prUrl ? `
       <a href="${success.prUrl}" class="link-btn" target="_blank">
         🔗 View ${isPR ? 'Pull Request' : 'Branch'} on GitHub
+      </a>
+    ` : ''}
+
+    ${success.workflowTrigger?.success && success.workflowTrigger.workflowUrl ? `
+      <a href="${success.workflowTrigger.workflowUrl}" class="link-btn" target="_blank" style="background: #b8e7ff;">
+        🚀 View Workflow Actions
       </a>
     ` : ''}
 
@@ -828,8 +915,18 @@ export class PRWorkflowUI {
             commitMessage: msg.details.commitMessage,
             prTitle: msg.details.prTitle,
             prBody: this.generatePRBody(),
-            isNewBranch: msg.details.isNewBranch
+            isNewBranch: msg.details.isNewBranch,
+            workflowTrigger: msg.details.workflowTrigger  // NEW: Include workflow trigger config
           };
+
+          // Save workflow settings for next time
+          if (msg.details.workflowTrigger) {
+            await SecureStorage.storeWorkflowSettings({
+              workflowTriggerEnabled: msg.details.workflowTrigger.enabled,
+              workflowFileName: msg.details.workflowTrigger.workflowFileName
+            });
+          }
+
           this.options.onComplete(details);
           break;
 

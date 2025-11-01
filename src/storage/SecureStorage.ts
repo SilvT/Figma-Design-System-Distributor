@@ -14,8 +14,18 @@ import { GitHubCredentials, GitHubConfig } from '../github/GitHubTypes';
 const STORAGE_KEYS = {
   GITHUB_CONFIG: 'github_config_v1',
   GITHUB_CREDENTIALS: 'github_credentials_v1',
-  LAST_CONNECTION_TEST: 'github_last_test_v1'
+  LAST_CONNECTION_TEST: 'github_last_test_v1',
+  WORKFLOW_SETTINGS: 'workflow_settings_v1'  // NEW: Workflow trigger settings
 } as const;
+
+// =============================================================================
+// WORKFLOW SETTINGS TYPE
+// =============================================================================
+
+export interface WorkflowSettings {
+  workflowTriggerEnabled: boolean;
+  workflowFileName: string;
+}
 
 // =============================================================================
 // ENCRYPTION HELPERS
@@ -269,6 +279,52 @@ export class SecureStorage {
       return !!(credentials?.token && typeof credentials.token === 'string' && credentials.token.trim().length > 0);
     } catch (error) {
       return false;
+    }
+  }
+
+  // =============================================================================
+  // WORKFLOW SETTINGS STORAGE
+  // =============================================================================
+
+  /**
+   * Store workflow trigger settings
+   */
+  static async storeWorkflowSettings(settings: WorkflowSettings): Promise<void> {
+    try {
+      await figma.clientStorage.setAsync(
+        STORAGE_KEYS.WORKFLOW_SETTINGS,
+        JSON.stringify(settings)
+      );
+    } catch (error) {
+      console.error('Failed to store workflow settings:', error);
+      throw new Error('Failed to store workflow settings');
+    }
+  }
+
+  /**
+   * Retrieve workflow trigger settings
+   */
+  static async getWorkflowSettings(): Promise<WorkflowSettings | null> {
+    try {
+      const settingsString = await figma.clientStorage.getAsync(STORAGE_KEYS.WORKFLOW_SETTINGS);
+
+      if (!settingsString) {
+        // Return default settings if none exist
+        return {
+          workflowTriggerEnabled: false,
+          workflowFileName: 'transform-tokens.yml'
+        };
+      }
+
+      return JSON.parse(settingsString) as WorkflowSettings;
+    } catch (error) {
+      console.error('Failed to retrieve workflow settings:', error);
+
+      // Return defaults on error
+      return {
+        workflowTriggerEnabled: false,
+        workflowFileName: 'transform-tokens.yml'
+      };
     }
   }
 }

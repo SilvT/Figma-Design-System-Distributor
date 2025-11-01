@@ -173,6 +173,23 @@ export type GitHubConnectionStatus =
   | 'insufficient-permissions';
 
 // =============================================================================
+// GITHUB ACTIONS WORKFLOW INTEGRATION
+// =============================================================================
+
+export interface WorkflowTriggerConfig {
+  enabled: boolean;           // Whether to trigger workflow
+  workflowFileName: string;   // e.g., 'transform-tokens.yml'
+  inputs?: Record<string, string>; // Optional workflow inputs
+}
+
+export interface WorkflowTriggerResult {
+  triggered: boolean;
+  success?: boolean;
+  error?: string;
+  workflowUrl?: string; // Link to Actions page
+}
+
+// =============================================================================
 // PLUGIN INTEGRATION
 // =============================================================================
 
@@ -183,6 +200,7 @@ export interface TokenPushRequest {
     createPullRequest?: boolean;
     branchName?: string;
     commitMessage?: string;
+    workflowTrigger?: WorkflowTriggerConfig;  // NEW: Optional workflow trigger
   };
 }
 
@@ -193,4 +211,5 @@ export interface TokenPushResult {
   error?: string;
   filesCreated: string[];
   filesUpdated: string[];
+  workflowTrigger?: WorkflowTriggerResult;  // NEW: Workflow trigger result
 }

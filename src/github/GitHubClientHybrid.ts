@@ -250,6 +250,28 @@ export class GitHubClientHybrid {
   }
 
   // =============================================================================
+  // GITHUB ACTIONS OPERATIONS
+  // =============================================================================
+
+  async triggerWorkflow(
+    owner: string,
+    repo: string,
+    workflowId: string,
+    ref: string,
+    inputs?: Record<string, string>
+  ): Promise<{ success: boolean; error?: string }> {
+    if (this.useStaticFallback) {
+      console.log('🔄 GitHubClientHybrid.triggerWorkflow - Using static fallback');
+      return GitHubClientStatic.triggerWorkflow(this.credentials, owner, repo, workflowId, ref, inputs);
+    } else if (this.regularClient) {
+      console.log('🔄 GitHubClientHybrid.triggerWorkflow - Using regular client');
+      return this.regularClient.triggerWorkflow(owner, repo, workflowId, ref, inputs);
+    } else {
+      throw new Error('No client available');
+    }
+  }
+
+  // =============================================================================
   // UTILITY METHODS
   // =============================================================================
 

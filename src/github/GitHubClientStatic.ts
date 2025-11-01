@@ -448,6 +448,56 @@ export class GitHubClientStatic {
   }
 
   // =============================================================================
+  // GITHUB ACTIONS OPERATIONS
+  // =============================================================================
+
+  /**
+   * Triggers a GitHub Actions workflow dispatch event
+   */
+  static async triggerWorkflow(
+    credentials: GitHubCredentials,
+    owner: string,
+    repo: string,
+    workflowId: string,
+    ref: string,
+    inputs?: Record<string, string>
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await GitHubClientStatic.makeRequest(
+        credentials,
+        `/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            ref,
+            inputs: inputs || {}
+          })
+        }
+      );
+
+      return { success: true };
+    } catch (error: any) {
+      // Handle specific error cases
+      if (error.status === 404) {
+        return {
+          success: false,
+          error: 'Workflow file not found. Please add the workflow to your repository.'
+        };
+      }
+      if (error.status === 403) {
+        return {
+          success: false,
+          error: 'Insufficient permissions. Token needs "actions:write" scope.'
+        };
+      }
+      return {
+        success: false,
+        error: error.message || 'Failed to trigger workflow'
+      };
+    }
+  }
+
+  // =============================================================================
   // UTILITY METHODS
   // =============================================================================
 

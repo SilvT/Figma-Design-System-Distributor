@@ -1,0 +1,36 @@
+name: Transform Design Tokens
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number that triggered this'
+        required: false
+  push:
+    paths:
+      - 'tokens/raw/figma-tokens.json'
+
+jobs:
+  transform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Style Dictionary
+        run: npm install -g style-dictionary
+
+      - name: Transform tokens
+        run: style-dictionary build
+
+      - name: Commit transformed files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🎨 Transform design tokens [automated]"
+          file_pattern: "tokens/*"

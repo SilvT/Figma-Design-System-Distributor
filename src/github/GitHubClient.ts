@@ -476,6 +476,62 @@ export class GitHubClient {
   }
 
   // =============================================================================
+  // GITHUB ACTIONS OPERATIONS
+  // =============================================================================
+
+  /**
+   * Triggers a GitHub Actions workflow dispatch event
+   * @param owner Repository owner
+   * @param repo Repository name
+   * @param workflowId Workflow file name (e.g., 'transform-tokens.yml')
+   * @param ref Branch name to run workflow on
+   * @param inputs Optional workflow inputs
+   * @returns Promise<{success: boolean; error?: string}> - true if successful, false if failed
+   */
+  async triggerWorkflow(
+    owner: string,
+    repo: string,
+    workflowId: string,
+    ref: string,
+    inputs?: Record<string, string>
+  ): Promise<{ success: boolean; error?: string }> {
+    debugLog.githubDebug(`🔧 [${this.clientId}] triggerWorkflow called - owner: ${owner}, repo: ${repo}, workflow: ${workflowId}, ref: ${ref}`);
+
+    try {
+      await this.makeRequest(`/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`, {
+        method: 'POST',
+        body: JSON.stringify({
+          ref,
+          inputs: inputs || {}
+        })
+      });
+
+      debugLog.githubDebug(`✅ [${this.clientId}] triggerWorkflow - workflow triggered successfully`);
+      return { success: true };
+    } catch (error: any) {
+      console.error(`❌ [${this.clientId}] triggerWorkflow - failed:`, error);
+
+      // Handle specific error cases
+      if (error.status === 404) {
+        return {
+          success: false,
+          error: 'Workflow file not found. Please add the workflow to your repository.'
+        };
+      }
+      if (error.status === 403) {
+        return {
+          success: false,
+          error: 'Insufficient permissions. Token needs "actions:write" scope.'
+        };
+      }
+      return {
+        success: false,
+        error: error.message || 'Failed to trigger workflow'
+      };
+    }
+  }
+
+  // =============================================================================
   // UTILITY METHODS
   // =============================================================================
 

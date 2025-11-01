@@ -16,6 +16,7 @@ import { PRWorkflowUI, PRDetails, PRSuccess } from '../ui/PRWorkflowUI';
 import { PullRequestService } from '../github/PullRequestService';
 import { GitOperations, TokenFileConfig } from '../github/GitOperations';
 import { ErrorHandler } from '../errors/ErrorHandler';
+import { WorkflowTriggerConfig, WorkflowTriggerResult } from '../github/GitHubTypes';
 
 // =============================================================================
 // TYPES
@@ -486,12 +487,30 @@ export class ExportWorkflow {
 
       console.log(`✅ Pull request #${prResult.prNumber} created!`);
 
-      // Step 5: Show success
+      // Step 5: Optionally trigger GitHub Actions workflow
+      let workflowResult: WorkflowTriggerResult = { triggered: false };
+
+      if (prDetails.workflowTrigger?.enabled) {
+        console.log('🔄 Triggering GitHub Actions workflow...');
+        const triggerStart = performance.now();
+
+        workflowResult = await this.triggerWorkflowSafely(
+          repository,
+          prDetails.workflowTrigger,
+          prDetails.branchName
+        );
+
+        const triggerDuration = performance.now() - triggerStart;
+        console.log(`✅ Workflow trigger completed in ${triggerDuration.toFixed(0)}ms`);
+      }
+
+      // Step 6: Show success
       const prSuccess: PRSuccess = {
         action: 'create-pr',
         prNumber: prResult.prNumber!,
         prUrl: prResult.prUrl!,
-        branchName: prDetails.branchName
+        branchName: prDetails.branchName,
+        workflowTrigger: workflowResult  // NEW: Include workflow trigger result
       };
 
       // Show success modal through PR workflow UI
@@ -517,6 +536,59 @@ export class ExportWorkflow {
     } catch (error) {
       console.error('❌ PR workflow execution failed:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Safely triggers workflow without throwing errors
+   * Failures here should NOT prevent PR creation success
+   */
+  private async triggerWorkflowSafely(
+    repository: any,
+    workflowConfig: WorkflowTriggerConfig,
+    branchName: string
+  ): Promise<WorkflowTriggerResult> {
+    try {
+      // Get the client from GitHubAuth
+      const client = this.githubAuth.getClient();
+      if (!client) {
+        return {
+          triggered: true,
+          success: false,
+          error: 'GitHub client not available'
+        };
+      }
+
+      const result = await client.triggerWorkflow(
+        repository.owner,
+        repository.name,
+        workflowConfig.workflowFileName,
+        branchName,
+        workflowConfig.inputs
+      );
+
+      if (result.success) {
+        const workflowUrl = `https://github.com/${repository.owner}/${repository.name}/actions`;
+        return {
+          triggered: true,
+          success: true,
+          workflowUrl
+        };
+      } else {
+        console.warn('⚠️ Workflow trigger failed:', result.error);
+        return {
+          triggered: true,
+          success: false,
+          error: result.error
+        };
+      }
+    } catch (error: any) {
+      console.error('❌ Unexpected error triggering workflow:', error);
+      return {
+        triggered: true,
+        success: false,
+        error: error.message || 'Unexpected error'
+      };
     }
   }
 

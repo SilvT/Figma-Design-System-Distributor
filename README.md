@@ -134,6 +134,57 @@ A high-performance Figma plugin that bridges the gap between design and developm
 
 ---
 
+## 🔄 CI/CD Integration (Optional)
+
+The plugin can trigger GitHub Actions workflows to automatically transform tokens after PR creation using tools like Style Dictionary.
+
+### Quick Setup
+
+1. **Download the example workflow**
+   ```bash
+   curl -o .github/workflows/transform-tokens.yml \
+     https://raw.githubusercontent.com/YourOrg/design-system-distributor/main/examples/transform-tokens.yml
+   ```
+
+2. **Ensure your GitHub token has `actions:write` scope**
+   - Go to [GitHub Personal Access Tokens](https://github.com/settings/tokens)
+   - Edit your token and enable the `workflow` scope
+   - Update the token in the plugin if needed
+
+3. **Enable in plugin settings**
+   - When creating a PR, check "Trigger CI/CD workflow after push"
+   - Enter your workflow file name (default: `transform-tokens.yml`)
+   - Settings are saved for future use
+
+### What Happens
+
+```
+1. Plugin creates PR with raw tokens
+   ↓
+2. Plugin triggers GitHub Actions workflow
+   ↓
+3. Workflow transforms tokens (Style Dictionary, etc.)
+   ↓
+4. Transformed tokens committed to the same PR
+   ↓
+5. PR is ready for review with both raw and transformed tokens
+```
+
+### Features
+
+- **Optional**: Disabled by default, enable when needed
+- **Safe**: PR creation always succeeds, even if workflow trigger fails
+- **Flexible**: Works with any token transformation tool
+- **Clear Feedback**: Shows workflow status in success dialog
+
+### Documentation
+
+- [Complete Setup Guide](docs/GITHUB_ACTIONS_INTEGRATION.md)
+- [Example Workflow File](examples/transform-tokens.yml)
+- [Troubleshooting Guide](docs/GITHUB_ACTIONS_INTEGRATION.md#troubleshooting)
+
+---
+
 ## 📊 Performance
 
 | Metric | Time | Note |
