@@ -355,6 +355,15 @@ export class PRWorkflowUI {
       border-color: #510081;
     }
 
+    .form-input:disabled,
+    .form-select:disabled,
+    .form-textarea:disabled {
+      background: #f8f9fa;
+      color: #6c757d;
+      cursor: not-allowed;
+      border-color: #dee2e6;
+    }
+
     .branch-tag {
       display: inline-block;
       background: #28a745;
@@ -620,14 +629,29 @@ export class PRWorkflowUI {
 
       baseBranchSelect.addEventListener('change', function() {
         if (this.value === '__create_new__') {
+          // User wants to create a new branch
           isNewBranch = true;
           newTag.style.display = 'inline-block';
+          branchNameInput.disabled = false;
+          branchNameInput.value = branchNameInput.getAttribute('data-original-value') || '';
           branchNameInput.focus();
         } else {
+          // User selected an existing branch - auto-fill and disable
           isNewBranch = false;
           newTag.style.display = 'none';
+          branchNameInput.value = this.value;
+          branchNameInput.disabled = true;
         }
       });
+
+      // Initialize the branch name input state based on initial selection
+      if (baseBranchSelect.value !== '__create_new__') {
+        branchNameInput.value = baseBranchSelect.value;
+        branchNameInput.disabled = true;
+      }
+
+      // Store original value for when user switches back to create new
+      branchNameInput.setAttribute('data-original-value', branchNameInput.value);
 
       // Handle workflow trigger checkbox
       const workflowCheckbox = document.getElementById('enable-workflow-trigger');
