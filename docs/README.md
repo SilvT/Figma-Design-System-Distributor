@@ -1,19 +1,25 @@
-# Documentation
+# User Documentation
 
-This folder contains documentation and reference materials for the Figma Design System Distributor plugin.
+This folder contains user-facing documentation and guides for the Figma Design System Distributor plugin.
 
-## User-Facing Documentation
+## User Guides
 
-These files contain content shown to users in the plugin UI tooltips:
+- **[TOKEN_CREATION_GUIDE.md](./TOKEN_CREATION_GUIDE.md)** - Step-by-step GitHub token creation instructions
+  - Shown in "Learn more" tooltip next to token input in the plugin
+  - Helps users create GitHub Personal Access Tokens safely
 
-- **[TOKEN_CREATION_GUIDE.md](./TOKEN_CREATION_GUIDE.md)** - GitHub token creation instructions (shown in "Learn more" tooltip next to token input)
-- **[CREDENTIAL_SECURITY.md](./CREDENTIAL_SECURITY.md)** - Security information about credential storage (shown in "Learn more" tooltip next to save credentials checkbox)
+- **[CREDENTIAL_SECURITY.md](./CREDENTIAL_SECURITY.md)** - Security information about credential storage
+  - Shown in "Learn more" tooltip next to save credentials checkbox
+  - Explains how credentials are encrypted and stored
 
-## Developer Documentation
+## For More Help
 
-- **[example-github-integration.ts](./example-github-integration.ts)** - Example code showing GitHub integration patterns
+- **[FAQ.md](../FAQ.md)** - Comprehensive FAQ for designers and non-technical users
+- **[README.md](../README.md)** - Main project overview for users
+- **[INSTALLATION.md](../INSTALLATION.md)** - Installation instructions
 
-## Additional Documentation
+## For Developers
 
-- **[LOGS/](../LOGS/)** - Development session logs and integration documentation
-- **[README.md](../README.md)** - Main project README
+Technical documentation has been moved to:
+- **[dev-docs/](../dev-docs/)** - Complete developer documentation
+- **[dev-docs/TECHNICAL_README.md](../dev-docs/TECHNICAL_README.md)** - Technical architecture details

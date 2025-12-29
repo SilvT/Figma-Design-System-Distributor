@@ -146,7 +146,8 @@ The plugin will automatically use the new version next time you run it.
 ## Next Steps
 
 - Read the [README.md](README.md) for usage instructions
-- Check out [TECHNICAL_README.md](TECHNICAL_README.md) for developer documentation
+- Check the [FAQ.md](FAQ.md) for common questions
+- For developers: See [dev-docs/TECHNICAL_README.md](dev-docs/TECHNICAL_README.md) for technical documentation
 - Report bugs or request features at [GitHub Issues](https://github.com/SilvT/Figma-Design-System-Distributor/issues)
 
 ---

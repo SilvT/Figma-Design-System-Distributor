@@ -24,9 +24,20 @@
       "Bash(~/bin/gh release view:*)",
       "Bash(cat:*)",
       "Bash(git tag -a v1.3.1 -m \"$(cat <<''EOF''\nRelease v1.3.1 - Critical Bug Fix: Token Extraction\n\nCRITICAL BUG FIX: Fixes token extraction which was completely broken in v1.3.0\n\n## What Was Broken\nThe plugin was not extracting ANY tokens from Figma files. All extraction\nmethods failed with errors:\n- Failed to populate variable registry\n- Failed to extract variables  \n- Failed to extract color tokens\n- Failed to extract component tokens\n- Result: 0 tokens extracted\n\n## Root Cause\nThe plugin used documentAccess: \"dynamic-page\" which requires explicitly\nloading pages before accessing content. Our token extractor tried to access\nstyles and components directly without loading pages first.\n\n## The Fix\nChanged documentAccess from \"dynamic-page\" to \"current-page\" which allows\ndirect access to the current page''s content. This is the correct mode for\na design token extractor.\n\n## Impact\n✅ Plugin now successfully extracts all tokens from Figma files\n✅ Colors, typography, spacing, effects, and variables all working\n✅ GitHub push functionality working correctly\n\nThis is a critical update - all v1.3.0 users should upgrade immediately.\n\nFor detailed changes, see commit 0a6e414\nEOF\n)\")",
-      "Bash(dist/figma-design-system-distributor-v1.3.1.zip)"
+      "Bash(dist/figma-design-system-distributor-v1.3.1.zip)",
+      "Bash(git mv:*)",
+      "Bash(mv:*)",
+      "Bash(claude sessions list:*)",
+      "Bash(claude --list-sessions:*)",
+      "Bash(claude doctor)",
+      "Bash(code:*)",
+      "Read(//Users/silvia/Library/**)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "task-master-ai"
+  ]
 }

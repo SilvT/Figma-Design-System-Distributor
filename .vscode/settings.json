@@ -6,5 +6,13 @@
       ],
       "url": "https://yuanqing.github.io/create-figma-plugin/figma-plugin.json"
     }
-  ]
+  ],
+  "markdown.preview.openMarkdownLinks": "inEditor",
+  "markdown.preview.scrollPreviewWithEditor": false,
+  "markdown.preview.scrollEditorWithPreview": false,
+  "markdown.preview.automaticallyShowPreviewOfMarkdownBeingEdited": false,
+  "markdown.extension.preview.autoShowPreviewToSide": false,
+  "workbench.editorAssociations": {
+    "*.md": "default"
+  }
 }
