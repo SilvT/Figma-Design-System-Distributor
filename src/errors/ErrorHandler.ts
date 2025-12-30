@@ -117,7 +117,7 @@ export class ErrorHandler {
         const delay = Math.min(1000 * Math.pow(2, attempts - 1), 5000);
         await new Promise((resolve) => setTimeout(resolve, delay));
 
-        console.log(`⚠️ Retrying operation (attempt ${attempts + 1}/${maxRetries})...`);
+        // console.log(`⚠️ Retrying operation (attempt ${attempts + 1}/${maxRetries})...`);
       }
     }
 

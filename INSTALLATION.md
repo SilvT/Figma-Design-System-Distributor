@@ -18,7 +18,7 @@
 
 3. **Run the plugin:**
    - Open any Figma file
-   - Go to Menu → Plugins → Development → Design System Distributor
+   - Go to Menu → Plugins → Development → Token Launch
    - The plugin will launch
 
 ---
@@ -138,7 +138,7 @@ The plugin will automatically use the new version next time you run it.
 
 1. Open Figma Desktop
 2. Go to Menu → Plugins → Development
-3. Find "Design System Distributor"
+3. Find "Token Launch"
 4. Click the "..." menu → Remove plugin
 
 ---

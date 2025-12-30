@@ -12,20 +12,20 @@ export class ClientTracker {
     const timestamp = new Date().toISOString().split('T')[1].slice(0, -1);
     const logEntry = `[${timestamp}] 🔍 ${message}`;
 
-    console.log(logEntry, data || '');
+    // console.log(logEntry, data || '');
     this.logs.push(logEntry + (data ? ` ${JSON.stringify(data)}` : ''));
   }
 
   static inspectObject(name: string, obj: any) {
-    console.log(`🔍 INSPECTING ${name}:`, {
-      type: typeof obj,
-      isNull: obj === null,
-      isUndefined: obj === undefined,
-      constructor: obj?.constructor?.name,
-      keys: obj ? Object.keys(obj) : 'N/A',
-      methods: obj ? Object.getOwnPropertyNames(obj).filter(key => typeof obj[key] === 'function') : 'N/A',
-      prototype: obj ? Object.getOwnPropertyNames(Object.getPrototypeOf(obj)) : 'N/A'
-    });
+    // console.log(`🔍 INSPECTING ${name}:`, {
+    //   type: typeof obj,
+    //   isNull: obj === null,
+    //   isUndefined: obj === undefined,
+    //   constructor: obj?.constructor?.name,
+    //   keys: obj ? Object.keys(obj) : 'N/A',
+    //   methods: obj ? Object.getOwnPropertyNames(obj).filter(key => typeof obj[key] === 'function') : 'N/A',
+    //   prototype: obj ? Object.getOwnPropertyNames(Object.getPrototypeOf(obj)) : 'N/A'
+    // });
   }
 
   static traceMethodCall(objectName: string, methodName: string, obj: any): boolean {

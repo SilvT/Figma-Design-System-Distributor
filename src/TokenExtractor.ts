@@ -1,10 +1,10 @@
 /**
- * TokenExtractor - Comprehensive design token extraction for Figma Design System Distributor
+ * TokenExtractor - Comprehensive design token extraction for Token Launch
  *
  * This class handles extraction of all design token types from Figma documents,
  * including colors, typography, spacing, effects, and Figma variables.
  *
- * @author Figma Design System Distributor
+ * @author Token Launch
  * @version 1.0.0
  */
 

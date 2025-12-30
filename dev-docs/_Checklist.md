@@ -52,7 +52,7 @@
       - [x] Change message subtitle from "Your tokens have been commited!" to -> "Your Tokens are now ready to be consumed!"
 
   - For 1st submission to Figma's review (live-version-1) 
-    - [ ] I want to change the name of the plugin from "Design System Distributor" to "Figma Distributor"
+    - [x] I want to change the name of the plugin from "Design System Distributor" to "Figma Distributor"
     - [x] Disable the "Create pull request" option from the Push Screen. Give a grey cast over the button and text, hover styles change to a standard disable hover behaviour. When hover a tooltip (standard tooltip, not a modal one like the other we can find in the project) tells the user " Future Feature"
 
     - [x] Implement the logic: 
@@ -81,15 +81,15 @@
   -[x] Margins on Push screen equal to the ones on Landing page
  - [x] Commit message box full width
 
-  Cleaning Tasks
+  ## Cleaning Tasks
 
-  - [ ] Clean and delete all console logs we aren't using or are deprecated
-  - [ ]Verify JSON file compatibility for Figma re-upload
+  - [x] Clean and delete all console logs we aren't using or are deprecated
+  - [x]Verify JSON file compatibility for Figma re-upload
   - [ ]Check plugin size and speed
   - [x]Compile and unify documentation
   - [ ]research if the window's top bar (X, name etc..) can be changed or styled
   - [ ] Error handling missing: validation checks before allowing the push? (e.g., checking if branch exists, if there are conflicts)
-
+- [ ] Change Name to Token Launch
 
 ---
 ---
@@ -106,7 +106,7 @@ Setup Tab
 
 - Second accordion: Repoository Configuration
     - [ ] error "Repository not found or you don't have access to it." --> change to "
-    ````
+    ```
       ❌ Repository not found or you don't have access to it.
 
       Common fixes:
@@ -116,7 +116,7 @@ Setup Tab
         scope instead of 'public_repo')
 
       [Validate Again]
-      ````
+      ```
 
     - branch input field
        - [x] once the owner and name has been validated; instead of an input field, it's a dropdown with the branches that already exist in that repo... always main by default --> basically it's the same branch dropdown as the one in the Push Screen. Use the same one, but keep the validation logic we have now
@@ -132,7 +132,7 @@ Setup Tab
 
      - [x] small bug - when the credentials have been saved from before, the dropbox doesn't show... I need to reenter either repo name or owner so when the validation triggers again then the dropdown shows... Once it's been validated and nothing has changed on the inputs above, i want the dropdown to always show
 
--[x] First accordion: 
+- [x] First accordion: 
       current copy: 
       '''
       Create a token at GitHub Settings with 'repo' scope.
@@ -148,7 +148,7 @@ Setup Tab
       '''
 
 - [x] Setup actions should be sticky at the bottom of the winndow; always visible when scrolling like a sticky footer
-  - - [ ] followup bug: force to always have scroll on Push screen, so the user can extend and navigate easily the commit message box with current setup, user can extend the box but then cannot see the end as it's under the sticky buttons
+  - - [x] followup bug: force to always have scroll on Push screen, so the user can extend and navigate easily the commit message box with current setup, user can extend the box but then cannot see the end as it's under the sticky buttons
 
 
 
@@ -162,7 +162,7 @@ Setup Tab
 ---
 ---
 
-🟡 Issue 4: Commit Message Needs Better Defaults
+[x] ✅ Issue 4: Commit Message Needs Better Defaults
 Current state: Default message is "Update design tokens from Figma"
 Why it's not optimal:
 
@@ -194,7 +194,7 @@ Users can still edit this, but having a descriptive default is far more useful.
 
 
 
-🟡 Issue 5: Add a validation layer before the "Push to Branch" button becomes enabled:
+[ ]🟡 Issue 5: Add a validation layer before the "Push to Branch" button becomes enabled:
 
 After user fills in branch name, show a loading spinner
 Check if branch exists, check permissions
@@ -204,7 +204,7 @@ Only enable "Push to Branch" button when all validations pass
 ---
 ---
 
-🟡Issue 6: Trigger CI/CD checbox
+🟡 Issue 6: Trigger CI/CD checbox
 1. In-plugin info button :
 ` ☐ Trigger CI/CD workflow after push (ℹ️)`
 Clicking (ℹ️) shows tooltip:

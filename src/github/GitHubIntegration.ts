@@ -1,5 +1,5 @@
 /**
- * GitHub Integration Example for Figma Design System Distributor
+ * GitHub Integration Example for Token Launch
  *
  * Demonstrates how to integrate GitHub API functionality
  * with your existing token extraction workflow.

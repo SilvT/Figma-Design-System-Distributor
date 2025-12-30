@@ -1,6 +1,6 @@
 # Frequently Asked Questions (FAQ)
 
-*This document addresses common questions from designers, stakeholders, and first-time users of the Figma Design System Distributor plugin.*
+*This document addresses common questions from designers, stakeholders, and first-time users of the Figma Token Launch plugin.*
 
 ---
 
@@ -26,7 +26,7 @@ Design tokens are the building blocks of your design system - colors, font sizes
 **Option 1: From Figma Community (Recommended)**
 1. Open Figma
 2. Go to Plugins → Browse all plugins
-3. Search for "Design System Distributor"
+3. Search for "Token Launch"
 4. Click Install
 
 **Option 2: Manual Installation**

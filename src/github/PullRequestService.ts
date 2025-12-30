@@ -97,10 +97,10 @@ export class PullRequestService {
       };
 
       ClientTracker.log('PullRequestService.createPullRequest - Creating PR', request);
-      console.log('📝 Creating pull request...');
-      console.log('   Title:', request.title);
-      console.log('   Head:', request.head);
-      console.log('   Base:', request.base);
+      // console.log('📝 Creating pull request...');
+      // console.log('   Title:', request.title);
+      // console.log('   Head:', request.head);
+      // console.log('   Base:', request.base);
 
       const response = await this.makeGitHubAPICall<PullRequestResponse>(
         repository,
@@ -114,7 +114,7 @@ export class PullRequestService {
         url: response.html_url
       });
 
-      console.log(`✅ Pull request #${response.number} created successfully`);
+      // console.log(`✅ Pull request #${response.number} created successfully`);
 
       return {
         success: true,
@@ -199,7 +199,7 @@ export class PullRequestService {
       hasBody: !!body
     });
 
-    console.log(`🌐 GitHub API: ${method} ${endpoint}`);
+    // console.log(`🌐 GitHub API: ${method} ${endpoint}`);
 
     const headers: Record<string, string> = {
       'Authorization': `Bearer ${token}`,

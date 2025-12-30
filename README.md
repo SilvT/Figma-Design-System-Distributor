@@ -1,4 +1,4 @@
-# Figma Design System Distributor
+# Token Launch
 
 **Connect your design to development—automatically.**
 
@@ -47,7 +47,7 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 ### Option 2: Install Manually (Available Now)
 1. **Download:** Get the [Manifest File](/manifest.json) from this repo
 2. **Install:** Figma → Plugins → Development → Import plugin from manifest
-3. **Run:** Find "Design System Distributor" in your plugins list
+3. **Run:** Find "Token Launch" in your plugins list
 
 ---
 

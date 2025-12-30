@@ -1,7 +1,7 @@
 {
   "name": "figma-design-system-distributor",
   "version": "1.3.1",
-  "description": "Export Figma design tokens to GitHub with automated validation and secure credential management",
+  "description": "Launch design tokens from Figma to GitHub with automated validation and secure credential management",
   "author": "Silvia T. <99726377+SilvT@users.noreply.github.com>",
   "license": "MIT",
   "repository": {

@@ -664,7 +664,7 @@ export class GitOperations {
       if (errorMessage.includes('Reference already exists')) {
         // This is actually OK - the branch already exists, so we can just use it
         debugLog.githubDebug(`ℹ️ Branch ${branchName} already exists, which is fine for our use case`);
-        console.log(`ℹ️ Branch ${branchName} already exists, proceeding...`);
+        // console.log(`ℹ️ Branch ${branchName} already exists, proceeding...`);
         return { success: true };
       }
 

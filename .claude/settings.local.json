@@ -36,7 +36,9 @@
       "WebFetch(domain:phosphoricons.com)",
       "WebFetch(domain:unpkg.com)",
       "Bash(rm:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git checkout:*)",
+      "Bash(time npm run build)"
     ],
     "deny": [],
     "ask": []

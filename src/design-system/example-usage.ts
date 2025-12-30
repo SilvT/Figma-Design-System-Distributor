@@ -21,7 +21,7 @@ export function createLandingPageHTML(data: {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Design System Distributor</title>
+      <title>Token Launch</title>
       <style>
         /* Design System CSS */
         ${generateDesignSystemCSS()}
@@ -191,7 +191,7 @@ export function createLoadingScreenHTML(): string {
     <body>
       <div class="loading-container">
         <div class="logo"><i class="ph-rocket-launch" data-weight="duotone" style="background: linear-gradient(135deg, #DEE3FC 0%, #F7E3E3 100%); -webkit-background-clip: text; background-clip: text; color: transparent;"></i></div>
-        <h2 class="ds-h2" style="margin-bottom: 8px; color: #000000;">Design System Distributor</h2>
+        <h2 class="ds-h2" style="margin-bottom: 8px; color: #000000;">Token Launch</h2>
         <p class="ds-body" style="color: #525252; margin-bottom: 24px;">Loading your design tokens...</p>
         ${createSpinner()}
         <div class="progress-container">

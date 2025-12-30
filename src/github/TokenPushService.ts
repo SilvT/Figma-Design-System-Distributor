@@ -269,7 +269,7 @@ export class TokenPushService {
 - Exported: ${new Date().toISOString().split('T')[0]}
 - Source: ${tokenData.metadata.documentName}
 
-🤖 Generated with Figma Design System Distributor`
+🤖 Generated with Token Launch`
         };
 
         console.log(`📁 Target: ${config.repository.owner}/${config.repository.name}`);

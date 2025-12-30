@@ -336,7 +336,7 @@ export class GitHubConfigManager {
    */
   getTokenSetupUrl(): string {
     const scopes = ['repo'].join(',');
-    const description = 'Figma Design System Distributor Plugin';
+    const description = 'Token Launch Plugin';
 
     return `https://github.com/settings/personal-access-tokens/new?description=${encodeURIComponent(description)}&scopes=${scopes}`;
   }

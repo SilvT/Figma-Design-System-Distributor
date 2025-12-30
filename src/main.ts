@@ -202,23 +202,23 @@ function displayTokenSummary(tokens: BasicTokenCount): void {
  * Test basic Figma API access
  */
 function testFigmaAPIAccess(): boolean {
-  console.log('Testing Figma API access...');
+  // console.log('Testing Figma API access...');
 
   try {
     // Test document access
     const documentName = figma.root.name;
-    console.log(`✓ Document access: ${documentName}`);
+    // console.log(`✓ Document access: ${documentName}`);
 
     // Test styles access
     const paintStyles = figma.getLocalPaintStyles();
-    console.log(`✓ Paint styles access: ${paintStyles.length} styles`);
+    // console.log(`✓ Paint styles access: ${paintStyles.length} styles`);
 
     // Test variables access
     const collections = figma.variables.getLocalVariableCollections();
-    console.log(`✓ Variables access: ${collections.length} collections`);
+    // console.log(`✓ Variables access: ${collections.length} collections`);
 
     // Test notification system
-    console.log('✓ Notification system test');
+    // console.log('✓ Notification system test');
 
     figma.notify('✓ All Figma API tests passed!', { timeout: 2000 });
     return true;
@@ -234,7 +234,7 @@ function testFigmaAPIAccess(): boolean {
  * Run diagnostic tests for GitHub integration
  */
 async function runGitHubDiagnostics(): Promise<void> {
-  console.log('🔬 === STARTING GITHUB DIAGNOSTICS ===');
+  // console.log('🔬 === STARTING GITHUB DIAGNOSTICS ===');
 
   try {
     // Import diagnostic modules dynamically to avoid issues if they fail
@@ -242,26 +242,26 @@ async function runGitHubDiagnostics(): Promise<void> {
     const { BuildEnvironmentDetector } = await import('./github/BuildEnvironmentDetector');
 
     // Quick environment check first
-    console.log('⚡ Running quick environment diagnostic...');
+    // console.log('⚡ Running quick environment diagnostic...');
     BuildEnvironmentDetector.quickDiagnostic();
 
     // Quick test of essential functionality
-    console.log('⚡ Running quick integration test...');
+    // console.log('⚡ Running quick integration test...');
     const quickTestPassed = await DiagnosticTester.quickTest();
 
     if (quickTestPassed) {
-      console.log('✅ Quick diagnostic PASSED - GitHub integration should work');
+      // console.log('✅ Quick diagnostic PASSED - GitHub integration should work');
       figma.notify('✅ GitHub diagnostic: PASSED', { timeout: 3000 });
     } else {
-      console.log('❌ Quick diagnostic FAILED - GitHub integration may have issues');
+      // console.log('❌ Quick diagnostic FAILED - GitHub integration may have issues');
       figma.notify('⚠️ GitHub diagnostic: ISSUES DETECTED', { error: true, timeout: 5000 });
 
       // Run full diagnostic for detailed analysis
-      console.log('🔬 Running full diagnostic for detailed analysis...');
+      // console.log('🔬 Running full diagnostic for detailed analysis...');
       const fullResult = await DiagnosticTester.runFullDiagnostic();
 
       if (fullResult.summary.riskLevel === 'HIGH') {
-        console.log('🚨 HIGH RISK detected - consider alternative build configuration');
+        // console.log('🚨 HIGH RISK detected - consider alternative build configuration');
         figma.notify('🚨 HIGH RISK: Use npm run build:dev', { error: true, timeout: 5000 });
       }
     }
@@ -271,14 +271,14 @@ async function runGitHubDiagnostics(): Promise<void> {
     figma.notify('❌ Diagnostic test failed', { error: true, timeout: 3000 });
   }
 
-  console.log('🔬 === GITHUB DIAGNOSTICS COMPLETE ===');
+  // console.log('🔬 === GITHUB DIAGNOSTICS COMPLETE ===');
 }
 
 /**
  * Perform real token extraction using TokenExtractor
  */
 async function performRealExtraction(): Promise<ExtractionResult> {
-  console.log('Starting real token extraction...');
+  // console.log('Starting real token extraction...');
 
   try {
     // Configure extraction
@@ -300,8 +300,8 @@ async function performRealExtraction(): Promise<ExtractionResult> {
     const result = await extractor.extractAllTokens();
     const extractionTime = Date.now() - startTime;
 
-    console.log(`✓ Real extraction completed in ${extractionTime}ms`);
-    console.log(`✓ Found ${result.tokens.length} tokens, ${result.variables.length} variables, ${result.collections.length} collections`);
+    // console.log(`✓ Real extraction completed in ${extractionTime}ms`);
+    // console.log(`✓ Found ${result.tokens.length} tokens, ${result.variables.length} variables, ${result.collections.length} collections`);
 
     return result;
 
@@ -376,7 +376,7 @@ function createJSONDataset(result: ExtractionResult, documentInfo: DocumentInfo,
   transformed._metadata = {
     file: filename,
     exportedAt: timestamp,
-    exportedBy: `Figma Design System Distributor v${getPluginVersion()}`,
+    exportedBy: `Token Launch v${getPluginVersion()}`,
     sourceDocument: documentInfo.name,
     totalTokens: result.tokens.length,
     totalVariables: result.variables.length,
@@ -437,7 +437,7 @@ function generateJSONFilename(documentInfo: DocumentInfo): string {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function downloadJSONFile(result: ExtractionResult, documentInfo: DocumentInfo, extractionDuration: number): Promise<void> {
   try {
-    console.log('Preparing JSON file for download...');
+    // console.log('Preparing JSON file for download...');
 
     const dataset = createJSONDataset(result, documentInfo, extractionDuration);
     const jsonString = JSON.stringify(dataset, null, 2);
@@ -581,8 +581,8 @@ async function downloadJSONFile(result: ExtractionResult, documentInfo: Document
       }
     };
 
-    console.log(`✓ JSON download UI opened - file: ${filename}`);
-    console.log(`✓ File size: ${(jsonString.length / 1024).toFixed(1)} KB`);
+    // console.log(`✓ JSON download UI opened - file: ${filename}`);
+    // console.log(`✓ File size: ${(jsonString.length / 1024).toFixed(1)} KB`);
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -623,7 +623,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter","Roboto","H
 <body>
 <div class="container">
 <div class="logo"><i class="ph-palette ph-duotone"></i></div>
-<div class="title">Design System Distributor</div>
+<div class="title">Token Launch</div>
 <div class="subtitle">Loading your design tokens...</div>
 <div class="spinner"></div>
 </div>
@@ -669,19 +669,19 @@ async function main(): Promise<void> {
       throw new Error('Invalid Figma environment. Please open a Figma document and try again.');
     }
     timings['2_validate_environment'] = Date.now() - step2Start;
-    console.log(`⏱️  [${timings['2_validate_environment']}ms] Environment validated`);
+    // console.log(`⏱️  [${timings['2_validate_environment']}ms] Environment validated`);
 
     // Step 3: Get document info
     const step3Start = Date.now();
     const documentInfo = await getDocumentInfo();
     timings['3_get_document_info'] = Date.now() - step3Start;
-    console.log(`⏱️  [${timings['3_get_document_info']}ms] Document info retrieved: ${documentInfo.name}`);
+    // console.log(`⏱️  [${timings['3_get_document_info']}ms] Document info retrieved: ${documentInfo.name}`);
 
     // Step 4: Import ExportWorkflow module
     const step4Start = Date.now();
     const { ExportWorkflow } = await import('./workflow/ExportWorkflow');
     timings['4_import_workflow'] = Date.now() - step4Start;
-    console.log(`⏱️  [${timings['4_import_workflow']}ms] ExportWorkflow module imported`);
+    // console.log(`⏱️  [${timings['4_import_workflow']}ms] ExportWorkflow module imported`);
 
     // Step 5: Create TokenExtractor
     const step5Start = Date.now();
@@ -696,7 +696,7 @@ async function main(): Promise<void> {
     };
     const tokenExtractor = new TokenExtractor(config);
     timings['5_create_extractor'] = Date.now() - step5Start;
-    console.log(`⏱️  [${timings['5_create_extractor']}ms] TokenExtractor created`);
+    // console.log(`⏱️  [${timings['5_create_extractor']}ms] TokenExtractor created`);
 
     // Step 6: Create workflow instance
     const step6Start = Date.now();
@@ -705,7 +705,7 @@ async function main(): Promise<void> {
       documentInfo
     });
     timings['6_create_workflow'] = Date.now() - step6Start;
-    console.log(`⏱️  [${timings['6_create_workflow']}ms] Workflow instance created`);
+    // console.log(`⏱️  [${timings['6_create_workflow']}ms] Workflow instance created`);
 
     // Step 7: Run workflow (shows main UI)
     const step7Start = Date.now();
@@ -723,57 +723,28 @@ async function main(): Promise<void> {
     console.log(`   (Loading screen was visible for ${loadingScreenDuration}ms)`);
     console.log('✨'.repeat(40) + '\n');
 
-    console.log(`⏱️  [${timings['7_run_workflow']}ms] Workflow executed and UI shown`);
+    // console.log(`⏱️  [${timings['7_run_workflow']}ms] Workflow executed and UI shown`);
 
     // Calculate total time
     const totalDuration = Date.now() - launchTime;
     timings['TOTAL'] = totalDuration;
 
-    // Print detailed performance report
-    console.log('\n' + '='.repeat(80));
-    console.log('📊 PERFORMANCE BREAKDOWN');
-    console.log('='.repeat(80));
-    console.log(`Step 1 - Show loading screen:     ${timings['1_show_loading_screen'].toString().padStart(6)}ms  (${((timings['1_show_loading_screen'] / totalDuration) * 100).toFixed(1)}%)`);
-    console.log(`Step 2 - Validate environment:    ${timings['2_validate_environment'].toString().padStart(6)}ms  (${((timings['2_validate_environment'] / totalDuration) * 100).toFixed(1)}%)`);
-    console.log(`Step 3 - Get document info:       ${timings['3_get_document_info'].toString().padStart(6)}ms  (${((timings['3_get_document_info'] / totalDuration) * 100).toFixed(1)}%)`);
-    console.log(`Step 4 - Import workflow module:  ${timings['4_import_workflow'].toString().padStart(6)}ms  (${((timings['4_import_workflow'] / totalDuration) * 100).toFixed(1)}%)`);
-    console.log(`Step 5 - Create TokenExtractor:   ${timings['5_create_extractor'].toString().padStart(6)}ms  (${((timings['5_create_extractor'] / totalDuration) * 100).toFixed(1)}%)`);
-    console.log(`Step 6 - Create workflow:         ${timings['6_create_workflow'].toString().padStart(6)}ms  (${((timings['6_create_workflow'] / totalDuration) * 100).toFixed(1)}%)`);
-    console.log(`Step 7 - Run workflow & show UI:  ${timings['7_run_workflow'].toString().padStart(6)}ms  (${((timings['7_run_workflow'] / totalDuration) * 100).toFixed(1)}%)`);
-    console.log('─'.repeat(80));
-    console.log(`TOTAL PLUGIN LOAD TIME:           ${totalDuration.toString().padStart(6)}ms  (100.0%)`);
-    console.log('='.repeat(80));
+    // Print simple performance summary
+    console.log(`⏱️ Plugin loaded in ${totalDuration}ms`);
 
     // Identify bottlenecks
     const sortedTimings = Object.entries(timings)
       .filter(([key]) => key !== 'TOTAL')
       .sort(([, a], [, b]) => b - a);
 
-    console.log('\n🔍 SLOWEST OPERATIONS:');
-    sortedTimings.slice(0, 3).forEach(([step, time], index) => {
-      const stepName = step.replace(/^\d+_/, '').replace(/_/g, ' ');
-      console.log(`  ${index + 1}. ${stepName}: ${time}ms`);
-    });
-
+    // Simplified performance check
     if (totalDuration > 1000) {
-      console.log('\n⚠️  WARNING: Load time exceeds 1 second. Consider further optimization.');
-    } else if (totalDuration < 500) {
-      console.log('\n✅ EXCELLENT: Load time under 500ms!');
-    } else {
-      console.log('\n✓ GOOD: Load time acceptable.');
+      console.log('⚠️ Load time exceeds 1 second');
     }
-    console.log('='.repeat(80));
 
-    // Print user-facing timing summary
-    console.log('\n' + '👤'.repeat(40));
-    console.log('👤 USER-FACING PERFORMANCE MILESTONES');
-    console.log('👤'.repeat(40));
-    console.log(`\n🚀 Plugin launched:           ${new Date(userFacingTimings.launch).toTimeString().split(' ')[0]}`);
-    console.log(`🎨 Loading screen shown:      +${userFacingTimings.loadingScreenShown - userFacingTimings.launch}ms`);
-    console.log(`✨ Main UI shown:              +${userFacingTimings.mainUIShown - userFacingTimings.launch}ms`);
-    console.log(`\n📊 Loading screen duration:    ${loadingScreenDuration}ms`);
-    console.log(`📊 Total time to interactive:  ${timeToMainUI}ms`);
-    console.log('\n' + '👤'.repeat(40) + '\n');
+
+    // Performance summary (simplified)
+    // console.log(`Loading time: ${timeToMainUI}ms`);
 
     if (!workflowResult.success && workflowResult.error) {
       figma.notify(`Export failed: ${workflowResult.error}`, { error: true });

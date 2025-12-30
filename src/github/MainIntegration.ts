@@ -18,7 +18,7 @@ import { GitHubAuth } from './GitHubAuth';
  */
 export async function mainWithGitPush(): Promise<void> {
   try {
-    console.log('🚀 Starting Design System Distributor with Git Push...');
+    console.log('🚀 Starting Token Launch with Git Push...');
 
     // Step 1: Initialize services
     const { tokenExtractor, pushService, feedback } = await initializeServices();
@@ -256,7 +256,7 @@ export async function pushWithCustomConfig(tokenData: any): Promise<void> {
     },
     targetPath: 'tokens/raw/',
     filename: `figma-tokens-${new Date().toISOString().split('T')[0]}.json`,
-    commitMessage: `feat: update design tokens from ${figma.root.name}\n\nExtracted from Figma with Design System Distributor`
+    commitMessage: `feat: update design tokens from ${figma.root.name}\n\nExtracted from Figma with Token Launch`
   };
 
   const feedback = TokenPushService.createFigmaFeedback();
