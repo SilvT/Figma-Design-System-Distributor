@@ -70,7 +70,7 @@ export class UnifiedExportUI {
     const { extractionResult } = this.options;
     const tokenCount = extractionResult.tokens?.length || 0;
     const variableCount = extractionResult.variables?.length || 0;
-    const fileSize = Math.round((JSON.stringify(extractionResult).length / 1024) * 10) / 10;
+    const collectionsCount = extractionResult.collections?.length || 0;
 
     const isGitConfigured = this.isGitConfigured();
     const gitStatus = this.getGitStatus();
@@ -145,8 +145,8 @@ export class UnifiedExportUI {
           }
 
           .tab.active {
-            color: #0F1112;
-            border-bottom: 2px solid #0F1112;
+            color: #6B21A8;
+            border-bottom: 2px solid #6B21A8;
             background: white;
           }
 
@@ -176,11 +176,11 @@ export class UnifiedExportUI {
           }
 
           .export-option {
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--color-lavender-200);
             border-radius: 12px;
             padding: 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--transition-default);
             background: white;
           }
 
@@ -190,22 +190,22 @@ export class UnifiedExportUI {
             box-shadow: var(--shadow-lg);
           }
 
-          /* GitHub card specific hover - green-mint gradient */
+          /* GitHub card specific hover - lavender-blush background with solid gradient-color border */
           #github-export-option:hover:not(.disabled) {
-            background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #f0fdfa 100%);
-            border-color: #16a34a;
+            background: var(--color-background-gradient);
+            border-color: var(--color-lavender-300);
           }
 
-          /* Download card specific hover - lavender gradient */
+          /* Download card specific hover - lavender-blush background with solid gradient-color border */
           .export-option:nth-child(2):hover {
-            background: linear-gradient(135deg, #ECEDF6 0%, #E8E9FD 50%, #DEE3FC 100%);
-            border-color: #8B5CF6;
+            background: var(--color-background-gradient);
+            border-color: var(--color-lavender-300);
           }
 
-          /* Enhanced lavender status on download card hover */
+          /* Enhanced blush status on download card hover */
           .export-option:nth-child(2):hover .status-available {
-            background: #D7D9F6;
-            color: #4C1D95;
+            background: var(--color-blush-400);
+            color: var(--color-text-primary);
           }
 
           .export-option.disabled {
@@ -229,12 +229,12 @@ export class UnifiedExportUI {
           .option-icon {
             width: 24px;
             height: 24px;
-            margin-right: 12px;
+            margin-right: 8px;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 16px;
           }
 
           .option-title {
@@ -270,6 +270,7 @@ export class UnifiedExportUI {
           .option-description {
             color: #666;
             margin-bottom: 12px;
+            font-size: 12px;
           }
 
           .option-details {
@@ -327,12 +328,16 @@ export class UnifiedExportUI {
           .step-header-arrow {
             margin-left: auto;
             font-size: 18px;
-            transition: transform 0.3s;
-            color: #666;
+            transition: transform 0.3s, color 0.3s;
+            color: #581C87; /* primary 900 - default state */
           }
 
           .step-header-arrow.collapsed {
             transform: rotate(-90deg);
+          }
+
+          .step-header-arrow.validated {
+            color: #4FA896; /* mint 700 - validated state */
           }
 
           .step-number {
@@ -427,22 +432,33 @@ export class UnifiedExportUI {
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
             text-decoration: none;
             display: inline-block;
             text-align: center;
           }
 
-          .btn-primary {
-            background: var(--color-primary-light);
-            color: var(--color-text-primary);
+          .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
           }
 
-          .btn-primary:hover {
-            background: var(--color-primary-dark);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+          .btn-primary {
+            background: #DEE3FC;
+            color: var(--color-text-primary);
+            font-weight: 600;
+          }
+
+          .btn-primary:hover:not(:disabled) {
+            background: #7C2D92;
             color: white;
+          }
+
+          .btn-primary:focus {
+            outline: 2px solid var(--color-primary-light);
+            outline-offset: 2px;
           }
 
           .btn-secondary {
@@ -450,8 +466,14 @@ export class UnifiedExportUI {
             color: white;
           }
 
-          .btn-secondary:hover {
+          .btn-secondary:hover:not(:disabled) {
             background: #404347;
+            color: white;
+          }
+
+          .btn-secondary:focus {
+            outline: 2px solid #1A1C1E;
+            outline-offset: 2px;
           }
 
           .btn-success {
@@ -459,8 +481,27 @@ export class UnifiedExportUI {
             color: white;
           }
 
-          .btn-success:hover {
+          .btn-success:hover:not(:disabled) {
             background: var(--color-success-dark);
+          }
+
+          .btn-success:focus {
+            outline: 2px solid #a855f7;
+            outline-offset: 2px;
+          }
+
+
+          /* Action buttons layout */
+          .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: flex-end;
+            margin-top: 16px;
+          }
+
+          .action-buttons .btn {
+            min-width: 120px;
           }
 
           .validation-status {
@@ -713,131 +754,6 @@ export class UnifiedExportUI {
             color: var(--color-primary-dark);
           }
 
-          .tooltip-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 9998;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-          }
-
-          .tooltip-overlay.visible {
-            display: block;
-            opacity: 1;
-          }
-
-          .tooltip-popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-width: 400px;
-            width: 90%;
-            max-height: 500px;
-            overflow-y: auto;
-            z-index: 9999;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-          }
-
-          .tooltip-popup.visible {
-            display: block;
-            opacity: 1;
-          }
-
-          .tooltip-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid #e5e7eb;
-          }
-
-          .tooltip-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-          }
-
-          .tooltip-close {
-            background: none;
-            border: none;
-            font-size: 20px;
-            color: #6b7280;
-            cursor: pointer;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.2s;
-          }
-
-          .tooltip-close:hover {
-            background: var(--color-background-secondary);
-            color: var(--color-text-primary);
-          }
-
-          .tooltip-content {
-            padding: 16px;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #374151;
-          }
-
-          .tooltip-content p {
-            margin: 0 0 12px 0;
-          }
-
-          .tooltip-content ul {
-            margin: 8px 0;
-            padding-left: 20px;
-          }
-
-          .tooltip-content li {
-            margin: 4px 0;
-          }
-
-          .tooltip-content code {
-            background: #f3f4f6;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-family: monospace;
-          }
-
-          .tooltip-content strong {
-            color: #111827;
-          }
-
-          .tooltip-link {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 8px 16px;
-            background: #C084FC;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 13px;
-            transition: background 0.2s;
-          }
-
-          .tooltip-link:hover {
-            background: var(--color-primary-dark);
-          }
 
           /* Info Section Styles */
           .info-section {
@@ -911,8 +827,8 @@ export class UnifiedExportUI {
                 <span class="stat-label">Total Tokens</span>
               </div>
               <div class="stat">
-                <span class="stat-value">${fileSize} KB</span>
-                <span class="stat-label">File Size</span>
+                <span class="stat-value">${collectionsCount}</span>
+                <span class="stat-label">Collections</span>
               </div>
             </div>
           </div>
@@ -932,7 +848,7 @@ export class UnifiedExportUI {
               <div class="export-options">
                 <div id="github-export-option" class="export-option ${isGitConfigured ? '' : 'disabled'}" onclick="${isGitConfigured ? 'selectExport(\'git-push\')' : 'switchTab(\'github-setup\')'}">
                   <div class="option-header">
-                    <div class="option-icon" style="background: #16a34a; color: white;"><i class="ph-rocket-launch" data-weight="bold"></i></div>
+                    <div class="option-icon" style="background: #000000; color: white;"><i class="ph-rocket-launch" data-weight="bold"></i></div>
                     <div class="option-title">Push to GitHub</div>
                     <div class="option-status ${isGitConfigured ? 'status-ready' : 'status-setup-required'}">
                       ${isGitConfigured ? 'Ready' : 'Setup Required'}
@@ -941,25 +857,16 @@ export class UnifiedExportUI {
                   <div class="option-description">
                     Push tokens directly to your GitHub repository with automated commits
                   </div>
-                  <div class="option-details">
-                    ${isGitConfigured ?
-                      `📁 ${gitStatus.repository} → ${gitStatus.path || 'tokens/raw/'}` :
-                      'Configure your GitHub repository in the GitHub Setup tab'
-                    }
-                  </div>
                 </div>
 
                 <div class="export-option" onclick="selectExport('download')">
                   <div class="option-header">
-                    <div class="option-icon" style="background: #8B5CF6; color: white;"><i class="ph-download-simple" data-weight="bold"></i></div>
+                    <div class="option-icon" style="background: #000000; color: white;"><i class="ph-download-simple" data-weight="bold"></i></div>
                     <div class="option-title">Download JSON File</div>
                     <div class="option-status status-available">Always Available</div>
                   </div>
                   <div class="option-description">
                     Download tokens as JSON file for manual processing or integration
-                  </div>
-                  <div class="option-details">
-                    <i class="ph-file-text"></i> figma-tokens-${new Date().toISOString().split('T')[0]}.json (${fileSize} KB)
                   </div>
                 </div>
 
@@ -997,13 +904,13 @@ export class UnifiedExportUI {
         </div>
 
         <!-- Token Guidance Tooltip -->
-        <div class="tooltip-overlay" id="token-tooltip-overlay" onclick="hideTokenTooltip()"></div>
-        <div class="tooltip-popup" id="token-tooltip">
-          <div class="tooltip-header">
-            <h3 class="tooltip-title">🔑 Creating Your GitHub Token</h3>
-            <button class="tooltip-close" onclick="hideTokenTooltip()" aria-label="Close">×</button>
+        <div class="ds-tooltip-overlay" id="token-tooltip-overlay" onclick="hideTokenTooltip()"></div>
+        <div class="ds-tooltip-popup" id="token-tooltip">
+          <div class="ds-tooltip-header">
+            <h3 class="ds-tooltip-title">🔑 Creating Your GitHub Token</h3>
+            <button class="ds-tooltip-close" onclick="hideTokenTooltip()" aria-label="Close">×</button>
           </div>
-          <div class="tooltip-content">
+          <div class="ds-tooltip-content">
             <p><strong>Step-by-step:</strong></p>
             <p>Go to GitHub → Settings → Developer settings → Personal access tokens → Generate new token</p>
 
@@ -1025,20 +932,20 @@ export class UnifiedExportUI {
             <p><strong>Why minimal permissions?</strong></p>
             <p>This plugin only needs to READ your repository structure and WRITE token files. No admin access required.</p>
 
-            <a href="https://github.com/settings/tokens/new" target="_blank" class="tooltip-link">
+            <a href="https://github.com/settings/tokens/new" target="_blank" class="ds-tooltip-link">
               Create Token on GitHub →
             </a>
           </div>
         </div>
 
         <!-- Security Info Tooltip -->
-        <div class="tooltip-overlay" id="security-tooltip-overlay" onclick="hideSecurityTooltip()"></div>
-        <div class="tooltip-popup" id="security-tooltip">
-          <div class="tooltip-header">
-            <h3 class="tooltip-title">🔒 How Your Credentials Are Stored</h3>
-            <button class="tooltip-close" onclick="hideSecurityTooltip()" aria-label="Close">×</button>
+        <div class="ds-tooltip-overlay" id="security-tooltip-overlay" onclick="hideSecurityTooltip()"></div>
+        <div class="ds-tooltip-popup" id="security-tooltip">
+          <div class="ds-tooltip-header">
+            <h3 class="ds-tooltip-title">🔒 How Your Credentials Are Stored</h3>
+            <button class="ds-tooltip-close" onclick="hideSecurityTooltip()" aria-label="Close">×</button>
           </div>
-          <div class="tooltip-content">
+          <div class="ds-tooltip-content">
             <p><strong>Your credentials are stored securely on your device:</strong></p>
             <ul>
               <li>✓ Encrypted automatically by Figma</li>
@@ -1341,6 +1248,7 @@ export class UnifiedExportUI {
 
                   validationStates.token = msg.success;
                   updateStepCompletion('token-step', msg.success);
+                  updateStepArrow('token-step-arrow', msg.success);
                   updateExportOption();
 
                   // Update the Complete Setup button state
@@ -1385,6 +1293,7 @@ export class UnifiedExportUI {
 
                   validationStates.repository = msg.success;
                   updateStepCompletion('repository-step', msg.success);
+                  updateStepArrow('repository-step-arrow', msg.success);
                   updateExportOption();
 
                   // Update the Complete Setup button state
@@ -1439,6 +1348,17 @@ export class UnifiedExportUI {
             }
           }
 
+          function updateStepArrow(arrowId, isValidated) {
+            const arrow = document.getElementById(arrowId);
+            if (arrow) {
+              if (isValidated) {
+                arrow.classList.add('validated');
+              } else {
+                arrow.classList.remove('validated');
+              }
+            }
+          }
+
           function updateConfiguredStatusCard(owner, name, branch) {
             // Update the repository and branch info in the configured status card
             const repoInfoDiv = document.querySelector('[style*="Repository"]')?.parentElement;
@@ -1480,9 +1400,11 @@ export class UnifiedExportUI {
             const statusDivs = document.querySelectorAll('.validation-status');
             statusDivs.forEach(div => div.style.display = 'none');
 
-            // Reset step completion states
+            // Reset step completion states and arrow colors
             updateStepCompletion('token-step', false);
             updateStepCompletion('repository-step', false);
+            updateStepArrow('token-step-arrow', false);
+            updateStepArrow('repository-step-arrow', false);
 
             // Reset Complete Setup button
             const completeButton = document.querySelector('button[onclick="completeSetup()"]');
@@ -1526,6 +1448,7 @@ export class UnifiedExportUI {
                 }
                 validationStates.token = false;
                 updateStepCompletion('token-step', false);
+                updateStepArrow('token-step-arrow', false);
                 updateExportOption();
 
                 clearTimeout(tokenValidationTimer);
@@ -1553,6 +1476,7 @@ export class UnifiedExportUI {
                 }
                 validationStates.repository = false;
                 updateStepCompletion('repository-step', false);
+                updateStepArrow('repository-step-arrow', false);
                 updateExportOption();
 
                 clearTimeout(repoValidationTimer);
@@ -1660,13 +1584,13 @@ export class UnifiedExportUI {
     const branch = repo?.branch || 'main';
 
     return `
-      <div class="gitConfigured" style="background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success-light) 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid var(--color-success);">
-        <div style="display: flex; align-items: center; margin-bottom: 12px;">
-          <div style="font-size: 20px; margin-right: 12px;"><i class="ph-check-circle" data-weight="fill" style="color: #16a34a;"></i></div>
-          <div>
-            <h3 style="margin: 0; color: var(--color-success-dark); font-size: 16px;">GitHub Configured</h3>
-
+      <div class="gitConfigured" style="background: #F6FBFA; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center;">
+            <div style="font-size: 20px; margin-right: 12px;"><i class="ph-check-circle" data-weight="fill" style="color: #16a34a;"></i></div>
+            <h3 style="margin: 0; color: var(--color-success-dark); font-size: 16px;">GitHub Setup</h3>
           </div>
+          <span style="background: #000000; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">Completed</span>
         </div>
         <div style="display:none; background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; margin-top: 12px;">
           <div style="font-size: 13px; color: var(--color-success-dark); margin-bottom: 6px;">
@@ -1695,7 +1619,7 @@ export class UnifiedExportUI {
             ${this.validationStates.token ? '✓' : '1'}
           </div>
           <div class="step-title">GitHub Personal Access Token</div>
-          <span class="step-header-arrow" id="token-step-arrow">▼</span>
+          <i class="ph-caret-down step-header-arrow ${this.validationStates.token ? 'validated' : ''}" id="token-step-arrow" data-weight="bold"></i>
         </div>
         <div class="step-content" id="token-step-content">
           <div class="form-group">
@@ -1717,7 +1641,7 @@ export class UnifiedExportUI {
           </div>
           <div class="validation-auto-note">
             ✨ Validates automatically 1 second after you finish typing
-            <button class="btn btn-secondary" onclick="validateToken()" style="margin-left: 12px; padding: 6px 12px; font-size: 12px;">
+            <button class="ds-btn ds-btn-secondary ds-gap-2" onclick="validateToken()">
               Validate Now
             </button>
           </div>
@@ -1731,7 +1655,7 @@ export class UnifiedExportUI {
             ${this.validationStates.repository ? '✓' : '2'}
           </div>
           <div class="step-title">Repository Configuration</div>
-          <span class="step-header-arrow" id="repository-step-arrow">▼</span>
+          <i class="ph-caret-down step-header-arrow ${this.validationStates.repository ? 'validated' : ''}" id="repository-step-arrow" data-weight="bold"></i>
         </div>
         <div class="step-content" id="repository-step-content">
           <div class="form-group">
@@ -1773,7 +1697,7 @@ export class UnifiedExportUI {
 
           <div class="validation-auto-note">
             ✨ Validates automatically 1 second after you finish typing
-            <button class="btn btn-secondary" onclick="validateRepository()" style="margin-left: 12px; padding: 6px 12px; font-size: 12px;">
+            <button class="ds-btn ds-btn-secondary ds-gap-2" onclick="validateRepository()">
               Validate Now
             </button>
           </div>
@@ -1785,7 +1709,7 @@ export class UnifiedExportUI {
         <div class="step-header" onclick="toggleStep('paths-step')">
           <div class="step-number" data-number="3">3</div>
           <div class="step-title">File Paths & Settings</div>
-          <span class="step-header-arrow" id="paths-step-arrow">▼</span>
+          <i class="ph-caret-down step-header-arrow" id="paths-step-arrow" data-weight="bold"></i>
         </div>
         <div class="step-content" id="paths-step-content">
           <div class="form-group">
@@ -1818,17 +1742,17 @@ export class UnifiedExportUI {
 
       <!-- Save Credentials Checkbox -->
       <div style="margin-top: 8px; padding: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-        <label style="display: flex; align-items: center; cursor: pointer; font-size: 13px;">
+        <label class="ds-checkbox-label" style="font-size: 13px;">
           <input
             type="checkbox"
+            class="ds-checkbox"
             id="save-credentials-checkbox"
             checked
-            style="width: 16px; height: 16px; margin-right: 8px; cursor: pointer;"
           >
           <span>Save credentials between sessions</span>
-          <span class="learn-more" onclick="showSecurityTooltip()" style="margin-left: 6px;">Learn more</span>
+          <span class="ds-learn-more" onclick="showSecurityTooltip()">Learn more</span>
         </label>
-        <div class="form-help" style="margin-top: 4px; margin-left: 24px;">
+        <div class="ds-form-help" style="margin-top: 4px; margin-left: 24px;">
           When checked, your credentials are encrypted and stored locally by Figma
         </div>
       </div>
@@ -1840,14 +1764,14 @@ export class UnifiedExportUI {
           'Complete token and repository validation first'
         }
         </div>
-       <div class="action-buttons" style="display:flex; justify-content:center; gap:16px; align-items:flex-end;" > 
-       <button class="btn btn-secondary" style="height:fit-content;" onclick="resetSetup()">
-      Reset
-    </button>
-       <button class="btn btn-primary" style="width:fit-content; margin-top:4px;" onclick="completeSetup()" ${this.validationStates.token && this.validationStates.repository ? '' : 'disabled'}>
-          Complete Setup
-        </button>
-        </div>
+       <div class="action-buttons">
+         <button class="ds-btn ds-btn-secondary" onclick="resetSetup()">
+           Reset
+         </button>
+         <button class="ds-btn ds-btn-primary" onclick="completeSetup()" ${this.validationStates.token && this.validationStates.repository ? '' : 'disabled'}>
+           Complete Setup
+         </button>
+       </div>
         </div>
       </div>
     `;

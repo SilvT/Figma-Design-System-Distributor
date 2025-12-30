@@ -82,7 +82,7 @@ export const createIconFromEmoji = (
  * @returns HTML link tag for phosphor icons CSS
  */
 export const getPhosphorIconsCDN = (): string => {
-  return '<link href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">';
+  return '<link href="https://cdn.jsdelivr.net/npm/phosphor-icons@1.4.2/src/css/icons.css" rel="stylesheet">';
 };
 
 /**

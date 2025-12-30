@@ -8,6 +8,7 @@ import {
   createSpinner,
   createProgressBar,
 } from './html-utils';
+import { GRADIENTS } from './tokens';
 import { PLUGIN_DIMENSIONS } from './tokens';
 
 // Example of creating a complete landing page with the new design system
@@ -29,7 +30,7 @@ export function createLandingPageHTML(data: {
         body {
           margin: 0;
           padding: 24px;
-          background: linear-gradient(135deg, #F7E3E3 0%, #DEE3FC 100%);
+          background: ${GRADIENTS.lavenderToBlush};
           min-height: 100vh;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
         }
@@ -155,7 +156,7 @@ export function createLoadingScreenHTML(): string {
 
         body {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
-          background: linear-gradient(135deg, #F7E3E3 0%, #DEE3FC 100%);
+          background: ${GRADIENTS.lavenderToBlush};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -189,7 +190,7 @@ export function createLoadingScreenHTML(): string {
     </head>
     <body>
       <div class="loading-container">
-        <div class="logo"><i class="ph-palette" data-weight="duotone"></i></div>
+        <div class="logo"><i class="ph-rocket-launch" data-weight="duotone" style="background: linear-gradient(135deg, #DEE3FC 0%, #F7E3E3 100%); -webkit-background-clip: text; background-clip: text; color: transparent;"></i></div>
         <h2 class="ds-h2" style="margin-bottom: 8px; color: #000000;">Design System Distributor</h2>
         <p class="ds-body" style="color: #525252; margin-bottom: 24px;">Loading your design tokens...</p>
         ${createSpinner()}
