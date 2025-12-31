@@ -1,8 +1,8 @@
 # Token Launch
 
-**Connect your design to development—automatically.**
+**Your token launch pad 🚀 Connect your design to development—automatically**
 
-Turn your Figma design tokens into code with one click. No technical knowledge required.
+Shoot your Fima Design tokens into code with one click. No technical knowledge required.
 
 [![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)]()
 [![Status](https://img.shields.io/badge/status-ready%20to%20use-green.svg)]()
@@ -29,6 +29,7 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 - Extract your variales and styles from Figma
 - Send them directly to your development team's codebase
 - No need to manually copy values or create handoff documents
+- Keep your values always Up-to-date
 
 **It's That Simple:**
 1. **Run the plugin** in your Figma document
@@ -74,6 +75,8 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 4. Enter your repository details
 5. Click "Save" - you're done!
 
+6. Push to Github everytime you update or change your tokens.
+
 *The plugin includes helpful guides and tooltips for every step.*
 
 ### Option B: File Download (Manual)
@@ -109,9 +112,6 @@ The plugin extracts tokens from:
 - **Text Styles** you've created
 - **Effect Styles** (shadows, blurs, etc.)
 - **Figma Variables** and collections
-- **Component Properties** you've set up
-
-No special organization required - the plugin finds everything automatically!
 
 ---
 
