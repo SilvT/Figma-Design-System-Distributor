@@ -6,6 +6,8 @@
  */
 
 import { ErrorMetadata, ErrorSeverity } from '../errors/ErrorTypes';
+import { generateDesignSystemCSS, createButton, createCard, generateDesignSystemHead } from '../design-system/html-utils';
+import { createPhosphorIcon } from '../design-system/icons';
 import { getWindowOptions } from './constants';
 
 // =============================================================================
@@ -81,23 +83,56 @@ export class ErrorDialog {
    */
   private buildHTML(): string {
     const { error, showTechnicalDetails } = this.options;
+    const severityIcon = this.getSeverityIconName(error.severity);
+    const severityColor = this.getSeverityColor(error.severity);
 
     return `
       <!DOCTYPE html>
       <html>
       <head>
-        <meta charset="UTF-8">
-        <style>
-          ${this.getStyles()}
-        </style>
+        ${generateDesignSystemHead()}
+        <title>Error: ${error.title}</title>
       </head>
       <body>
-        <div class="error-dialog">
-          ${this.renderHeader()}
-          ${this.renderContent()}
-          ${this.renderSolutions()}
-          ${showTechnicalDetails ? this.renderTechnicalDetails() : ''}
-          ${this.renderActions()}
+        <div class="ds-container">
+          <!-- Header -->
+          <div style="border-left: 4px solid ${severityColor}; padding: 1.5rem; background: var(--color-background-secondary);">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+              <div style="color: ${severityColor};">
+                ${createPhosphorIcon(severityIcon, { size: 24, weight: 'regular' })}
+              </div>
+              <div>
+                <h2 class="ds-title-medium" style="margin: 0; color: var(--color-text-primary);">${error.title}</h2>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                  <span class="ds-badge">${error.code}</span>
+                  <span class="ds-badge">${this.formatSeverity(error.severity)}</span>
+                </div>
+              </div>
+            </div>
+            <p class="ds-body" style="margin: 0; color: var(--color-text-secondary);">${error.userMessage}</p>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 1.5rem;">
+            ${error.solutions && error.solutions.length > 0 ? this.renderSolutionsDS(error.solutions) : ''}
+            ${showTechnicalDetails ? this.renderTechnicalDetailsDS(error) : ''}
+          </div>
+
+          <!-- Actions -->
+          <div style="padding: 1.5rem; border-top: 1px solid var(--color-border-subtle); background: var(--color-background-tertiary); display: flex; gap: 0.75rem;">
+            ${error.retryable ? createButton(`${createPhosphorIcon('arrow-clockwise', { size: 16 })} Retry`, 'primary', {
+              onclick: "window.parent.postMessage({type: 'error-retry'}, '*')"
+            }) : ''}
+            ${error.fallbackAvailable ? createButton(`${createPhosphorIcon('download-simple', { size: 16 })} Use Alternative`, 'secondary', {
+              onclick: "window.parent.postMessage({type: 'error-fallback'}, '*')"
+            }) : ''}
+            ${createButton(`${createPhosphorIcon('question', { size: 16 })} Learn More`, 'tertiary', {
+              onclick: "window.parent.postMessage({type: 'error-learn-more'}, '*')"
+            })}
+            ${createButton(`${createPhosphorIcon('x', { size: 16 })} Close`, 'tertiary', {
+              onclick: "window.parent.postMessage({type: 'error-close'}, '*')"
+            })}
+          </div>
         </div>
 
         <script>
@@ -623,5 +658,63 @@ export class ErrorDialog {
    */
   private formatSeverity(severity: ErrorSeverity): string {
     return severity.toUpperCase();
+  }
+
+  /**
+   * Get icon name for severity (for Phosphor icons)
+   */
+  private getSeverityIconName(severity: ErrorSeverity): string {
+    switch (severity) {
+      case ErrorSeverity.LOW:
+        return 'info';
+      case ErrorSeverity.MEDIUM:
+        return 'warning';
+      case ErrorSeverity.HIGH:
+        return 'warning-diamond';
+      case ErrorSeverity.CRITICAL:
+        return 'x-circle';
+      default:
+        return 'question';
+    }
+  }
+
+  /**
+   * Render solutions using design system components
+   */
+  private renderSolutionsDS(solutions: any[]): string {
+    if (!solutions || solutions.length === 0) return '';
+
+    const solutionCards = solutions.map((solution, index) => {
+      return createCard(`
+        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+          <div style="background: var(--color-primary); color: white; font-weight: 600; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 50%; min-width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${solution.step}</div>
+          <div>
+            <div class="ds-caption" style="font-weight: 500; margin-bottom: 0.25rem;">${solution.action}</div>
+            ${solution.details ? `<div class="ds-caption" style="color: var(--color-text-secondary);">${solution.details}</div>` : ''}
+          </div>
+        </div>
+      `);
+    }).join('');
+
+    return `
+      <div style="margin-bottom: 1.5rem;">
+        <h3 class="ds-heading" style="margin: 0 0 1rem;">Solutions</h3>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          ${solutionCards}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Render technical details using design system components
+   */
+  private renderTechnicalDetailsDS(error: ErrorMetadata): string {
+    return createCard(`
+      <h3 class="ds-heading" style="margin: 0 0 0.75rem;">Technical Details</h3>
+      <div class="ds-caption" style="color: var(--color-text-secondary); margin-bottom: 0.5rem;"><strong>Code:</strong> ${error.code}</div>
+      <div class="ds-caption" style="color: var(--color-text-secondary); margin-bottom: 0.5rem;"><strong>Category:</strong> ${this.formatCategory(error.category)}</div>
+      <div class="ds-caption" style="color: var(--color-text-secondary);"><strong>Technical Message:</strong> ${error.technicalMessage || 'No additional technical details available.'}</div>
+    `);
   }
 }
