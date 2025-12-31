@@ -228,3 +228,16 @@ Requires a workflow file in .github/workflows/
 - Starter .yml file with Style Dictionary config
 - User downloads and places in .github/workflows/
 - Plugin validates it exists before enabling CI/CD
+
+
+
+- [ ] All features tested and working
+- [ ] Tested on macOS (required)
+- [ ] Graceful error handling implemented
+- [ ] Offline mode shows helpful messages
+- [ ] Empty file scenario handled
+- [ ] Large file tested (500+ tokens)
+- [ ] Console is error-free (no red errors in Figma Console)
+- [ ] Loading states visible for all async operations
+- [ ] Performance is acceptable (~85ms extraction)
+- [ ] Memory usage is reasonable

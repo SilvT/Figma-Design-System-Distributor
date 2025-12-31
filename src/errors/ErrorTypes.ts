@@ -69,6 +69,9 @@ export enum ErrorCode {
   // Rate Limit Errors (RATE_*)
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
 
+  // Extraction Errors (EXTRACTION_*)
+  EXTRACTION_NO_TOKENS = 'EXTRACTION_NO_TOKENS',
+
   // Unknown Errors
   UNKNOWN_ERROR = 'UNKNOWN_ERROR'
 }
@@ -675,6 +678,33 @@ export const ERROR_REGISTRY: Record<ErrorCode, Omit<ErrorMetadata, 'code'>> = {
     ],
     retryable: true,
     fallbackAvailable: true
+  },
+
+  [ErrorCode.EXTRACTION_NO_TOKENS]: {
+    category: ErrorCategory.VALIDATION,
+    severity: ErrorSeverity.MEDIUM,
+    title: 'No Design Tokens Found',
+    userMessage: 'No design tokens (colors, typography, effects, variables) were found in this document.',
+    technicalMessage: 'Token extraction completed with zero tokens found',
+    solutions: [
+      {
+        step: 1,
+        action: 'Create color styles',
+        details: 'Select objects and create color styles in the Design panel'
+      },
+      {
+        step: 2,
+        action: 'Add text styles',
+        details: 'Create text styles from your typography elements'
+      },
+      {
+        step: 3,
+        action: 'Set up variables',
+        details: 'Use the Variables panel to create design tokens'
+      }
+    ],
+    retryable: false,
+    fallbackAvailable: false
   }
 };
 
