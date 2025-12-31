@@ -12,7 +12,15 @@ Turn your Figma design tokens into code with one click. No technical knowledge r
 [![Accessible](https://img.shields.io/badge/WCAG-AA%20compliant-brightgreen.svg)]()
 
 ---
-[What](#-what-this-plugin-does) | [How](#-security-&-privacy)
+
+## 📋 Table of Contents
+
+**Quick Navigation:**
+- [✨ What This Plugin Does](#-what-this-plugin-does) • [🎯 Perfect For](#-perfect-for) • [🚀 Getting Started](#-getting-started)
+- [🔧 Setup Guide](#-first-time-setup-5-minutes) • [🛡️ Security](#-security--privacy) • [🎨 Token Organization](#-how-your-tokens-are-organized)
+- [🔄 Workflow](#-typical-workflow) • [🆘 Help & Support](#-need-help) • [📋 Requirements](#-system-requirements)
+- [🛠️ For Developers](#️-for-developers) • [🎯 What's Next](#-whats-next)
+
 ---
 
 ## ✨ What This Plugin Does
@@ -112,14 +120,16 @@ No special organization required - the plugin finds everything automatically!
 **Daily/Weekly Use:**
 1. Update your design tokens in Figma
 2. Run the plugin
-3. Push to GitHub or download file
-4. Your developer receives the updates
-5. Code stays in sync with design
+3. Choose your target: main branch, existing branch, or create a new branch
+4. Add a commit message (auto-suggests changes since last push)
+5. Push directly to GitHub or download JSON file
+6. Your developer receives the updates with timestamp metadata
 
 **For GitHub Users:**
-- Creates a "Pull Request" (think of it as a change suggestion)
-- Your developer reviews and applies the changes
-- Automatic history of all design updates
+- Pushes JSON file directly to your chosen branch
+- Includes metadata with timestamps and change tracking
+- Ready for GitHub Actions or other CI/CD workflows
+- JSON can be easily converted to any format your team needs
 
 ---
 
@@ -176,10 +186,10 @@ No special organization required - the plugin finds everything automatically!
 
 We're continuously improving the plugin based on user feedback:
 
-- **More Export Formats:** CSS, SCSS, mobile platforms
-- **Enhanced Automation:** Even smoother GitHub workflows
-- **Better Previews:** See exactly what will be exported
-- **More platforms** Bitbucket, Gitlab...
+- **Pull Request Workflows:** Optional PR creation instead of direct pushes
+- **GitHub Actions Integration:** Built-in CI/CD pipeline setup from the plugin
+- **More Export Formats:** CSS, SCSS, mobile platforms (iOS, Android)
+- **More Git Platforms:** GitLab, Bitbucket...
 
 ---
 

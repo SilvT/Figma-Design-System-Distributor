@@ -41,7 +41,9 @@
       "Bash(time npm run build)",
       "Bash(git reset:*)",
       "WebFetch(domain:help.figma.com)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__ide__getDiagnostics",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

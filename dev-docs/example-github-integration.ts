@@ -5,8 +5,8 @@
  * with your existing token extraction workflow in main.ts
  */
 
-import { TokenExtractor, ExtractionConfig } from './src/TokenExtractor';
-import { GitHubIntegration } from './src/github/GitHubIntegration';
+import { TokenExtractor, ExtractionConfig } from '../src/TokenExtractor';
+import { GitHubIntegration } from '../src/github/GitHubIntegration';
 
 // =============================================================================
 // EXAMPLE INTEGRATION IN MAIN.TS

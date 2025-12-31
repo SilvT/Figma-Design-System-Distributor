@@ -1,6 +1,6 @@
-# Figma Design System Distributor - Developer Documentation
+# Token Launch - Developer Documentation
 
-**Technical overview and development resources for the Figma Design System Distributor plugin.**
+**Technical overview and development resources for the Token Launch Figma plugin.**
 
 [![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)]()
 [![Build Status](https://img.shields.io/badge/build-passing-success.svg)]()
@@ -42,8 +42,8 @@
 ### **Installation**
 ```bash
 # Clone repository
-git clone https://github.com/SilvT/Figma-Design-System-Distributor.git
-cd figma-design-system-distributor
+git clone https://github.com/SilvT/Token-Launch-Plugin.git
+cd token-launch-plugin
 
 # Install dependencies
 npm install
@@ -96,6 +96,34 @@ src/
 
 ---
 
+## 🔄 Current Workflow Implementation
+
+### **Direct Push Workflow**
+Token Launch currently implements a **direct push** workflow:
+
+1. **Branch Selection**: Users choose main branch, existing branch, or create new branch
+2. **Commit Message**: Auto-suggested based on changes since last push
+3. **Direct Push**: JSON file pushed directly to chosen branch (no PR creation)
+4. **Metadata Tracking**: Includes timestamps and change tracking for CI/CD integration
+
+### **JSON Output Structure**
+```typescript
+interface TokenOutput {
+  tokens: DesignToken[];
+  metadata: {
+    timestamp: string;
+    figmaDocumentId: string;
+    changesSinceLastPush: string;
+    version: string;
+  };
+}
+```
+
+### **GitHub Actions Ready**
+The JSON format is designed to integrate seamlessly with GitHub Actions or other CI/CD systems for automatic conversion to target formats.
+
+---
+
 ## 🔧 Key APIs and Interfaces
 
 ### **Token Extraction API**
@@ -116,6 +144,7 @@ interface GitHubConfig {
   repository: { owner: string; name: string; branch: string };
   paths: { rawTokens: string; processedTokens: string };
   commitMessage: string;
+  metadata: { timestamp: string; changesSinceLastPush: string };
 }
 ```
 
@@ -319,16 +348,16 @@ try {
 ## 📈 Roadmap
 
 ### **Upcoming Features (v1.4)**
-- Multiple export formats (CSS, SCSS, mobile)
-- Enhanced error handling and recovery
-- Performance monitoring dashboard
-- Batch operation support
+- **Pull Request Workflows**: Optional PR creation instead of direct pushes
+- **GitHub Actions Integration**: Built-in CI/CD pipeline setup from the plugin
+- **More Export Formats**: CSS, SCSS, mobile platforms (iOS, Android)
+- **Enhanced Previews**: See exactly what will be exported before pushing
 
 ### **Future Considerations (v2.0)**
-- Multi-platform support (Sketch, Adobe XD)
-- Real-time sync capabilities
-- Advanced token transformation
-- Team collaboration features
+- **More Git Platforms**: GitLab, Bitbucket, Azure DevOps
+- **Advanced CI/CD**: Custom pipeline templates and configurations
+- **Multi-format Export**: Simultaneous export to multiple formats
+- **Team Collaboration**: Shared configurations and workflow templates
 
 ---
 
