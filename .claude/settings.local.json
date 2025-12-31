@@ -39,7 +39,9 @@
       "Bash(npx tsc:*)",
       "Bash(git checkout:*)",
       "Bash(time npm run build)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "WebFetch(domain:help.figma.com)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
