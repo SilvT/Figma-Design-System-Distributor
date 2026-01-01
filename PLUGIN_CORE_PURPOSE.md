@@ -8,7 +8,7 @@
 Token Launch is a Figma plugin that:
 
 1. **Extracts design tokens** from Figma documents (colours, typography, spacing, effects, variables)
-2. **Delivers tokens to version control systems** via automated workflows (pull requests, commits) OR local file download
+2. **Delivers tokens to version control systems** via automated workflows (push commits) OR local file download
 3. **Bridges design and development** by automating the design-to-code handoff for design systems
 
 **Initial Implementation:** GitHub integration (v1.3.1)
