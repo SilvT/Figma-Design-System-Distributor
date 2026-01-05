@@ -271,7 +271,6 @@ async function runGitHubDiagnostics(): Promise<void> {
     }
 
   } catch (error) {
-    console.error('❌ Diagnostic test failed:', error);
     figma.notify('❌ Diagnostic test failed', { error: true, timeout: 3000 });
   }
 
@@ -400,7 +399,6 @@ function outputJSONToConsole(result: ExtractionResult, documentInfo: DocumentInf
 
   // Output with professional formatting
   console.log('\n' + '='.repeat(80));
-  console.log('📊 EXTRACTED DESIGN TOKENS (CLEAN JSON FORMAT)');
   console.log('='.repeat(80));
 
   // Output the complete JSON
@@ -408,13 +406,11 @@ function outputJSONToConsole(result: ExtractionResult, documentInfo: DocumentInf
   // console.log(JSON.stringify(dataset, null, 2));
 
   console.log('\n' + '='.repeat(80));
-  console.log('✅ JSON EXPORT SUMMARY');
   console.log('='.repeat(80));
   console.log(`📅 Export Time: ${dataset.generatedAt}`);
   console.log(`🎯 Total Collections: ${Object.keys(dataset.collections).length}`);
-  console.log(`🔧 Source Variables: ${dataset.source.originalVariableCount}`);
+  // Source variables counted
   console.log(`📚 Source Tokens: ${dataset.source.originalTokenCount}`);
-  console.log(`⏱️  Extraction Duration: ${extractionDuration}ms`);
   console.log(`📏 JSON Size: ${JSON.stringify(dataset).length.toLocaleString()} characters`);
   console.log('='.repeat(80));
 }
@@ -734,7 +730,6 @@ async function main(): Promise<void> {
     timings['TOTAL'] = totalDuration;
 
     // Print simple performance summary
-    console.log(`⏱️ Plugin loaded in ${totalDuration}ms`);
 
     // Identify bottlenecks
     const sortedTimings = Object.entries(timings)
@@ -743,7 +738,6 @@ async function main(): Promise<void> {
 
     // Simplified performance check
     if (totalDuration > 1000) {
-      console.log('⚠️ Load time exceeds 1 second');
     }
 
 
@@ -756,7 +750,6 @@ async function main(): Promise<void> {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('❌ Plugin failed:', errorMessage);
     figma.notify(`❌ Plugin failed: ${errorMessage}`, { error: true, timeout: 5000 });
     figma.closePlugin(`Plugin failed: ${errorMessage}`);
   }
@@ -847,9 +840,7 @@ async function mainOLD(): Promise<void> {
     const step7Duration = Date.now() - step7Start;
 
     if (workflowResult.success) {
-      console.log(`✅ Export completed via ${workflowResult.choice} (${step7Duration}ms)`);
     } else {
-      console.error(`❌ Export failed: ${workflowResult.error} (${step7Duration}ms)`);
       figma.notify(`Export failed: ${workflowResult.error}`, { error: true });
     }
     console.log(`✓ Export workflow completed (${step7Duration}ms)`);
@@ -867,13 +858,8 @@ async function mainOLD(): Promise<void> {
       console.log(`📄 Document: ${documentInfo.name}`);
       console.log(`🌐 Total Nodes: ${documentInfo.totalNodes}`);
       console.log(`🎯 Extracted Tokens: ${totalTokens}`);
-      console.log(`🔧 Variables: ${extractionResult.variables.length}`);
       console.log(`📚 Collections: ${extractionResult.collections.length}`);
-      console.log(`⏱️  Extraction Time: ${extractionDuration}ms`);
-      console.log(`⏱️  Total Plugin Time: ${totalDuration}ms`);
-      console.log(`✅ Export Method: ${workflowResult.choice.toUpperCase()}`);
       console.log('='.repeat(80));
-      console.log('\n📊 PERFORMANCE BREAKDOWN:');
       console.log(`  Step 1 - Environment validation: ${step1Duration}ms`);
       console.log(`  Step 2 - API access test: ${step2Duration}ms`);
       console.log(`  Step 3 - Document info: ${step3Duration}ms`);

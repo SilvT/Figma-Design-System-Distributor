@@ -455,9 +455,7 @@ export class GitHubSetupUI {
               select.addEventListener('change', function() {
                 updateConfig('repository.branch', this.value);
               });
-              console.log('✅ Branch dropdown created successfully');
             } else {
-              console.log('❌ Branch input not found or not an INPUT element');
             }
           }
 
@@ -488,7 +486,6 @@ export class GitHubSetupUI {
                   console.log('🌿 Received branches:', msg.branches);
                   populateBranchDropdown(msg.branches);
                 } else if (msg.success) {
-                  console.log('✅ Validation successful but no branches received');
                 }
               }
             }
@@ -756,10 +753,8 @@ export class GitHubSetupUI {
       this.createSetupUI();
     } else {
       // Complete setup
-      console.log('🔧 Setup completion - Validating configuration:', this.currentConfig);
 
       if (this.isConfigurationValid()) {
-        console.log('✅ Configuration is valid, completing setup...');
 
         if (this.options) {
           this.options.onComplete(this.currentConfig as GitHubConfig);
@@ -769,7 +764,6 @@ export class GitHubSetupUI {
         }
         // Don't close plugin - let the main workflow continue
       } else {
-        console.log('❌ Configuration validation failed:', this.currentConfig);
         figma.notify('Please fill in all required fields', { error: true });
       }
     }
@@ -830,7 +824,6 @@ export class GitHubSetupUI {
       const validation = await testClient.validateTokenPermissions();
 
       if (validation.valid) {
-        console.log('✅ Token validation successful');
 
         // Store the credentials for subsequent validation steps
         this.currentConfig.credentials = { token };
@@ -842,7 +835,6 @@ export class GitHubSetupUI {
           user: validation.user
         });
       } else {
-        console.log('❌ Token validation failed:', validation.error);
         figma.ui.postMessage({
           type: 'token-validation-result',
           success: false,
@@ -851,7 +843,6 @@ export class GitHubSetupUI {
       }
 
     } catch (error) {
-      console.error('❌ Token validation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Token validation failed';
 
       figma.ui.postMessage({
@@ -900,7 +891,6 @@ export class GitHubSetupUI {
       const testResult = await testClient.testConnection({ owner: trimmedOwner, name: trimmedName });
 
       if (testResult.success) {
-        console.log('✅ Repository validation successful');
 
         // Update config with trimmed values
         if (!this.currentConfig.repository) {
@@ -941,7 +931,6 @@ export class GitHubSetupUI {
           });
         } catch (branchError) {
           // If branch fetching fails, still show success but without branch dropdown
-          console.warn('⚠️ Could not fetch branches:', branchError);
           console.error('🌿 Branch fetch error details:', branchError);
           figma.ui.postMessage({
             type: 'repository-validation-result',
@@ -951,7 +940,6 @@ export class GitHubSetupUI {
           });
         }
       } else {
-        console.log('❌ Repository validation failed:', testResult.error);
 
         // Create detailed error message with fixes
         let errorMessage = '';
@@ -980,7 +968,6 @@ export class GitHubSetupUI {
       }
 
     } catch (error) {
-      console.error('❌ Repository validation error:', error);
       const baseErrorMessage = error instanceof Error ? error.message : 'Repository validation failed';
 
       let errorMessage = '';

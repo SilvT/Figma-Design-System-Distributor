@@ -19,7 +19,8 @@ const STORAGE_KEYS = {
   GITHUB_CONFIG: 'github_config_v1',
   GITHUB_CREDENTIALS: 'github_credentials_v1',
   LAST_CONNECTION_TEST: 'github_last_test_v1',
-  WORKFLOW_SETTINGS: 'workflow_settings_v1'  // NEW: Workflow trigger settings
+  WORKFLOW_SETTINGS: 'workflow_settings_v1',  // Workflow trigger settings
+  TOKEN_FILE_LOCATION: 'token_file_location_v1'  // NEW: Token file location preferences
 } as const;
 
 // =============================================================================
@@ -334,6 +335,47 @@ export class SecureStorage {
         workflowTriggerEnabled: false,
         workflowFileName: 'transform-tokens.yml'
       };
+    }
+  }
+
+  // =============================================================================
+  // TOKEN FILE LOCATION STORAGE
+  // =============================================================================
+
+  /**
+   * Store token file location preference
+   */
+  static async storeTokenFileLocation(location: string): Promise<void> {
+    try {
+      await figma.clientStorage.setAsync(
+        STORAGE_KEYS.TOKEN_FILE_LOCATION,
+        JSON.stringify({
+          location,
+          timestamp: Date.now()
+        })
+      );
+    } catch (error) {
+      console.error('Failed to store token file location:', error);
+      // Don't throw - this is a preference, not critical
+    }
+  }
+
+  /**
+   * Retrieve token file location preference
+   */
+  static async getTokenFileLocation(): Promise<string | null> {
+    try {
+      const settingString = await figma.clientStorage.getAsync(STORAGE_KEYS.TOKEN_FILE_LOCATION);
+
+      if (!settingString) {
+        return null; // No preference stored
+      }
+
+      const setting = JSON.parse(settingString);
+      return setting.location !== undefined ? setting.location : null;
+    } catch (error) {
+      console.error('Failed to retrieve token file location:', error);
+      return null; // Return null on error to use default
     }
   }
 }

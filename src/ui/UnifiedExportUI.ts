@@ -1267,25 +1267,20 @@ export class UnifiedExportUI {
 
           // Toggle accordion step
           function toggleStep(stepId) {
-            console.log('🔧 toggleStep() called for:', stepId);
             const content = document.getElementById(stepId + '-content');
             const arrow = document.getElementById(stepId + '-arrow');
 
             if (content && arrow) {
               const isCollapsed = content.classList.contains('collapsed');
-              console.log('🔧 Current state:', isCollapsed ? 'collapsed' : 'expanded');
 
               if (isCollapsed) {
-                console.log('🔧 Expanding step...');
                 content.classList.remove('collapsed');
                 arrow.classList.remove('collapsed');
               } else {
-                console.log('🔧 Collapsing step...');
                 content.classList.add('collapsed');
                 arrow.classList.add('collapsed');
               }
             } else {
-              console.error('🔧 ERROR: Could not find step elements for', stepId);
             }
           }
 
@@ -1534,7 +1529,6 @@ export class UnifiedExportUI {
                     console.log('🌿 Received branches:', msg.branches);
                     populateBranchDropdown(msg.branches);
                   } else if (msg.success) {
-                    console.log('✅ Validation successful but no branches received');
                   }
 
                   validationStates.repository = msg.success;
@@ -1567,7 +1561,6 @@ export class UnifiedExportUI {
                   // Update the current configuration with the completed setup
                   if (msg.config) {
                     currentConfig = msg.config;
-                    console.log('✅ Updated currentConfig with completed setup:', currentConfig);
                   }
                   // Update validation states and UI
                   updateExportOption();
@@ -2082,7 +2075,6 @@ export class UnifiedExportUI {
       const validation = await testClient.validateTokenPermissions();
 
       if (validation.valid) {
-        console.log('✅ Token validation successful');
 
         // Store the credentials
         if (!this.gitConfig.credentials) {
@@ -2098,7 +2090,6 @@ export class UnifiedExportUI {
           user: validation.user
         });
       } else {
-        console.log('❌ Token validation failed:', validation.error);
         this.validationStates.token = false;
         figma.ui.postMessage({
           type: 'token-validation-result',
@@ -2108,7 +2099,6 @@ export class UnifiedExportUI {
       }
 
     } catch (error) {
-      console.error('❌ Token validation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Token validation failed';
       this.validationStates.token = false;
 
@@ -2152,7 +2142,6 @@ export class UnifiedExportUI {
       const testResult = await testClient.testConnection({ owner, name });
 
       if (!testResult.success) {
-        console.log('❌ Repository validation failed:', testResult.error);
         this.validationStates.repository = false;
 
         // Create detailed error message with fixes
@@ -2185,7 +2174,6 @@ export class UnifiedExportUI {
       }
 
       // Repository exists, now fetch available branches
-      console.log('✅ Repository access confirmed, fetching branches...');
 
       // Store the repository config
       if (!this.gitConfig.repository) this.gitConfig.repository = { owner: '', name: '', branch: 'main' };
@@ -2227,7 +2215,6 @@ export class UnifiedExportUI {
         });
       } catch (branchError) {
         // If branch fetching fails, still show success but without branch dropdown
-        console.warn('⚠️ Could not fetch branches:', branchError);
         console.error('🌿 Branch fetch error details:', branchError);
         figma.ui.postMessage({
           type: 'repository-validation-result',
@@ -2240,7 +2227,6 @@ export class UnifiedExportUI {
       }
 
     } catch (error) {
-      console.error('❌ Repository validation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Repository validation failed';
       this.validationStates.repository = false;
 
@@ -2257,7 +2243,6 @@ export class UnifiedExportUI {
    */
   private async handleClearStorage(): Promise<void> {
     try {
-      console.log('🗑️ Clearing all stored data...');
 
       await SecureStorage.clearAll();
 
@@ -2274,11 +2259,9 @@ export class UnifiedExportUI {
         repository: false
       };
 
-      console.log('✅ Storage cleared successfully');
       figma.notify('✅ Setup reset successfully');
 
     } catch (error) {
-      console.error('❌ Error clearing storage:', error);
       figma.notify('⚠️ Error resetting setup', { error: true });
     }
   }
@@ -2300,17 +2283,13 @@ export class UnifiedExportUI {
 
         if (config.credentials) {
           await SecureStorage.storeCredentials(config.credentials);
-          console.log('✅ Credentials saved to storage');
         }
 
         await SecureStorage.storeConfig(config);
-        console.log('✅ Config saved to storage');
       } else {
-        console.log('🗑️ Clearing stored credentials (user chose not to save)...');
 
         // Clear any existing stored credentials
         await SecureStorage.clearAll();
-        console.log('✅ Credentials cleared from storage');
       }
 
       // Verify storage
@@ -2340,7 +2319,6 @@ export class UnifiedExportUI {
       }, 1500);
 
     } catch (error) {
-      console.error('❌ Setup completion failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Setup completion failed';
 
       figma.notify(`Setup failed: ${errorMessage}`, { error: true, timeout: 5000 });

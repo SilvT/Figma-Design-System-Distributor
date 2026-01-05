@@ -149,14 +149,30 @@ export class PRWorkflowUI {
     };
 
     // Get saved token file location (with fallback to default)
-    const getSavedTokenFileLocation = (): string => {
+    const getSavedTokenFileLocation = async (): Promise<string> => {
       try {
-        return localStorage.getItem('tokenFileLocation') || '/tokens';
+        // Try to get from secure storage first
+        const saved = await SecureStorage.getTokenFileLocation();
+        if (saved !== null) {
+          return saved; // This includes empty string "" for root level
+        }
+
+        // Fallback: try localStorage for migration
+        const legacySaved = localStorage.getItem('tokenFileLocation');
+        if (legacySaved !== null) { // Also handle empty string from localStorage
+          // Migrate to secure storage
+          await SecureStorage.storeTokenFileLocation(legacySaved);
+          // Clear legacy storage
+          localStorage.removeItem('tokenFileLocation');
+          return legacySaved;
+        }
+
+        return '/tokens'; // Default if nothing found
       } catch (e) {
-        return '/tokens'; // Fallback if localStorage unavailable
+        return '/tokens'; // Fallback if storage unavailable
       }
     };
-    const savedTokenFileLocation = getSavedTokenFileLocation();
+    const savedTokenFileLocation = await getSavedTokenFileLocation();
 
     const html = `
 <!DOCTYPE html>
@@ -1040,10 +1056,6 @@ export class PRWorkflowUI {
           }
         });
       } else {
-        console.error('❌ Could not find checkbox elements:', {
-          createNewBranchCheckbox: !!createNewBranchCheckbox,
-          newBranchInput: !!newBranchInput
-        });
       }
 
       // Handle workflow trigger checkbox
@@ -1114,13 +1126,6 @@ export class PRWorkflowUI {
       const tokenFileLocationRaw = tokenFileLocationElement ? tokenFileLocationElement.value : '';
       const tokenFileLocationValue = tokenFileLocationRaw.trim();
       const tokenFileLocation = tokenFileLocationValue; // Keep empty string as is to allow root placement
-
-      // Save user's choice for next session
-      try {
-        localStorage.setItem('tokenFileLocation', tokenFileLocation);
-      } catch (e) {
-        // Silently fail if localStorage unavailable
-      }
 
       const details = {
         action: currentAction,
@@ -1445,12 +1450,17 @@ export class PRWorkflowUI {
             workflowTrigger: msg.details.workflowTrigger  // NEW: Include workflow trigger config
           };
 
-          // Save workflow settings for next time
+          // Save user preferences for next time
           if (msg.details.workflowTrigger) {
             await SecureStorage.storeWorkflowSettings({
               workflowTriggerEnabled: msg.details.workflowTrigger.enabled,
               workflowFileName: msg.details.workflowTrigger.workflowFileName
             });
+          }
+
+          // Save token file location preference
+          if (msg.details.tokenFileLocation !== undefined) {
+            await SecureStorage.storeTokenFileLocation(msg.details.tokenFileLocation);
           }
 
           this.options.onComplete(details);
