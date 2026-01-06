@@ -43,11 +43,11 @@
     "editorType": [
       "figma"
     ],
-    "id": "token-launch",
+    "id": "1590435836553000116",
     "name": "Token Launch",
     "api": "1.0.0",
     "main": "src/main.ts",
-    "documentAccess": "current-page",
+    "documentAccess": "dynamic-page",
     "networkAccess": {
       "allowedDomains": [
         "https://api.github.com",
