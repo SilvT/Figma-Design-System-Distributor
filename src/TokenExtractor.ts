@@ -423,21 +423,16 @@ export class TokenExtractor {
     try {
       // Extract from local paint styles
       const paintStyles = figma.getLocalPaintStyles();
-      console.log(`🎨 Found ${paintStyles.length} local paint styles`);
 
       for (const style of paintStyles) {
         try {
-          console.log(`🎨 Processing paint style: "${style.name}" with ${style.paints?.length || 0} paints`);
           if (style.paints && style.paints.length > 0) {
-            console.log(`🎨 Paint type for "${style.name}": ${style.paints[0].type}`);
           }
 
           const colorToken = this.convertPaintStyleToColorToken(style);
           if (colorToken) {
-            console.log(`✅ Successfully converted paint style: "${style.name}" to color token`);
             colorTokens.push(colorToken);
           } else {
-            console.log(`❌ Failed to convert paint style: "${style.name}" (returned null)`);
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
@@ -468,14 +463,11 @@ export class TokenExtractor {
     try {
       // Extract from local text styles
       const textStyles = figma.getLocalTextStyles();
-      console.log(`📝 Found ${textStyles.length} local text styles`);
 
       for (const style of textStyles) {
         try {
-          console.log(`📝 Processing text style: "${style.name}"`);
           const typographyToken = this.convertTextStyleToTypographyToken(style);
           if (typographyToken) {
-            console.log(`✅ Successfully converted text style: "${style.name}" to typography token`);
             typographyTokens.push(typographyToken);
           }
         } catch (error) {
@@ -543,14 +535,11 @@ export class TokenExtractor {
     try {
       // Extract from local effect styles
       const effectStyles = figma.getLocalEffectStyles();
-      console.log(`✨ Found ${effectStyles.length} local effect styles`);
 
       for (const style of effectStyles) {
         try {
-          console.log(`✨ Processing effect style: "${style.name}"`);
           const effectToken = this.convertEffectStyleToEffectToken(style);
           if (effectToken) {
-            console.log(`✅ Successfully converted effect style: "${style.name}" to effect token`);
             effectTokens.push(effectToken);
           }
         } catch (error) {
@@ -692,8 +681,6 @@ export class TokenExtractor {
    * Convert gradient paint to gradient token (separate from color tokens)
    */
   private convertGradientToColorToken(style: PaintStyle, paint: GradientPaint): GradientToken {
-    console.log(`🌈 Converting gradient "${style.name}" of type ${paint.type}`);
-    console.log(`🌈 Gradient has ${paint.gradientStops.length} stops`);
 
     // Process gradient stops - preserve variable references when available
     const stops = paint.gradientStops.map((stop, index) => {
@@ -706,8 +693,6 @@ export class TokenExtractor {
         const variableId = stopWithVars.boundVariables.color.id;
         const variableName = this.getVariableNameById(variableId);
 
-        console.log(`  Stop ${index}: position=${stop.position}, variable=${variableName || variableId}`);
-
         return {
           position: stop.position,
           color: {
@@ -718,7 +703,6 @@ export class TokenExtractor {
       } else {
         // No variable reference, use computed color value
         const stopColour = this.rgbToHex(stop.color.r, stop.color.g, stop.color.b);
-        console.log(`  Stop ${index}: position=${stop.position}, colour=${stopColour}`);
 
         return {
           position: stop.position,
@@ -734,7 +718,6 @@ export class TokenExtractor {
     let angle: number | undefined;
     if (paint.type === 'GRADIENT_LINEAR') {
       angle = this.calculateGradientAngle(paint.gradientTransform);
-      console.log(`  Gradient angle: ${angle}°`);
     }
 
     const token: GradientToken = {
@@ -752,7 +735,6 @@ export class TokenExtractor {
       figmaNodeId: style.id
     };
 
-    console.log(`✅ Successfully created gradient token for "${style.name}"`);
     return token;
   }
 
@@ -801,7 +783,6 @@ export class TokenExtractor {
       if (hasFontFamilyVariable) {
         const fontFamilyVariableId = styleWithVars.boundVariables.fontFamily.id;
         const fontFamilyVariableName = this.getVariableNameById(fontFamilyVariableId);
-        console.log(`  Typography fontFamily variable: ${fontFamilyVariableName || fontFamilyVariableId}`);
 
         fontFamilyValue = {
           $alias: fontFamilyVariableName || `{${fontFamilyVariableId}}`,
@@ -814,8 +795,8 @@ export class TokenExtractor {
       if (hasFontWeightVariable) {
         const fontWeightVariableId = styleWithVars.boundVariables.fontWeight.id;
         const fontWeightVariableName = this.getVariableNameById(fontWeightVariableId);
-        console.log(`  Typography fontWeight variable: ${fontWeightVariableName || fontWeightVariableId}`);
 
+        
         fontWeightValue = {
           $alias: fontWeightVariableName || `{${fontWeightVariableId}}`,
           $aliasId: fontWeightVariableId
@@ -836,8 +817,8 @@ export class TokenExtractor {
       if (hasFontSizeVariable) {
         const fontSizeVariableId = styleWithVars.boundVariables.fontSize.id;
         const fontSizeVariableName = this.getVariableNameById(fontSizeVariableId);
-        console.log(`  Typography fontSize variable: ${fontSizeVariableName || fontSizeVariableId}`);
 
+        
         fontSizeValue = {
           $alias: fontSizeVariableName || `{${fontSizeVariableId}}`,
           $aliasId: fontSizeVariableId
@@ -849,8 +830,8 @@ export class TokenExtractor {
       if (hasLineHeightVariable) {
         const lineHeightVariableId = styleWithVars.boundVariables.lineHeight.id;
         const lineHeightVariableName = this.getVariableNameById(lineHeightVariableId);
-        console.log(`  Typography lineHeight variable: ${lineHeightVariableName || lineHeightVariableId}`);
 
+        
         lineHeightValue = {
           $alias: lineHeightVariableName || `{${lineHeightVariableId}}`,
           $aliasId: lineHeightVariableId
@@ -862,8 +843,8 @@ export class TokenExtractor {
       if (hasLetterSpacingVariable) {
         const letterSpacingVariableId = styleWithVars.boundVariables.letterSpacing.id;
         const letterSpacingVariableName = this.getVariableNameById(letterSpacingVariableId);
-        console.log(`  Typography letterSpacing variable: ${letterSpacingVariableName || letterSpacingVariableId}`);
 
+        
         letterSpacingValue = {
           $alias: letterSpacingVariableName || `{${letterSpacingVariableId}}`,
           $aliasId: letterSpacingVariableId
@@ -926,8 +907,8 @@ export class TokenExtractor {
         if (hasColorVariable) {
           const colorVariableId = effectWithVars.boundVariables.color.id;
           const colorVariableName = this.getVariableNameById(colorVariableId);
-          console.log(`  Effect color variable: ${colorVariableName || colorVariableId}`);
 
+          
           colorValue = {
             $alias: colorVariableName || `{${colorVariableId}}`,
             $aliasId: colorVariableId
@@ -947,8 +928,8 @@ export class TokenExtractor {
       if (hasRadiusVariable) {
         const radiusVariableId = effectWithVars.boundVariables.radius.id;
         const radiusVariableName = this.getVariableNameById(radiusVariableId);
-        console.log(`  Effect radius variable: ${radiusVariableName || radiusVariableId}`);
 
+        
         blurValue = {
           $alias: radiusVariableName || `{${radiusVariableId}}`,
           $aliasId: radiusVariableId

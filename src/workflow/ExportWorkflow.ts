@@ -216,7 +216,7 @@ export class ExportWorkflow {
     choice: ExportChoice
   ): Promise<Omit<WorkflowResult, 'extractionResult' | 'duration'>> {
     try {
-      console.log('🐛 DEBUG: ExportWorkflow.handleGitPush() - Using PR Workflow');
+      // console.log('🐛 DEBUG: ExportWorkflow.handleGitPush() - Using PR Workflow');
 
       // Configure GitHub services with the provided configuration
       if (choice.gitConfig) {
@@ -236,15 +236,15 @@ export class ExportWorkflow {
       const config = this.githubAuth.getPublicConfig();
       const baseBranch = config?.repository?.branch || 'main';
 
-      console.log('📝 Starting PR workflow...');
-      console.log('   Repository:', `${repository.owner}/${repository.name}`);
-      console.log('   Base branch:', baseBranch);
+      // console.log('📝 Starting PR workflow...');
+      // console.log('   Repository:', `${repository.owner}/${repository.name}`);
+      // console.log('   Base branch:', baseBranch);
 
       // Fetch available branches
       let availableBranches: string[] = [];
       try {
         availableBranches = await this.gitOps.listBranches(repository);
-        console.log('   Available branches:', availableBranches);
+        // console.log('   Available branches:', availableBranches);
       } catch (error) {
         // Continue with just the base branch if fetch fails
         availableBranches = [baseBranch];
@@ -267,7 +267,7 @@ export class ExportWorkflow {
       // User cancelled - return to landing page
       if (!prDetails) {
         this.cancelCount++;
-        console.log(`↩️ User cancelled PR workflow (attempt ${this.cancelCount}), returning to landing page...`);
+        // console.log(`↩️ User cancelled PR workflow (attempt ${this.cancelCount}), returning to landing page...`);
 
         // Prevent infinite loop - after 3 cancellations, end the workflow
         if (this.cancelCount >= 3) {
@@ -293,10 +293,10 @@ export class ExportWorkflow {
         return await this.handleUserChoice(newChoice, extractionResult);
       }
 
-      console.log('✅ User confirmed details:', {
-        action: prDetails.action,
-        branchName: prDetails.branchName
-      });
+      // console.log('✅ User confirmed details:', {
+      //   action: prDetails.action,
+      //   branchName: prDetails.branchName
+      // });
 
       // Reset cancel counter on successful confirmation
       this.cancelCount = 0;
@@ -436,7 +436,7 @@ export class ExportWorkflow {
     try {
       // Step 1: Ensure branch name is unique
       figma.notify('Creating branch...', { timeout: 2000 });
-      console.log('🌿 Ensuring unique branch name...');
+      // console.log('🌿 Ensuring unique branch name...');
 
       const uniqueBranchName = await this.prService.generateUniqueBranchName(
         repository,
@@ -444,12 +444,12 @@ export class ExportWorkflow {
       );
 
       if (uniqueBranchName !== prDetails.branchName) {
-        console.log(`   Branch ${prDetails.branchName} exists, using ${uniqueBranchName}`);
+        // console.log(`   Branch ${prDetails.branchName} exists, using ${uniqueBranchName}`);
         prDetails.branchName = uniqueBranchName;
       }
 
       // Step 2: Create new branch
-      console.log(`🌿 Creating branch: ${prDetails.branchName}`);
+      // console.log(`🌿 Creating branch: ${prDetails.branchName}`);
       const branchResult = await this.gitOps.createBranch(repository, prDetails.branchName);
 
       if (!branchResult.success) {
@@ -488,7 +488,7 @@ export class ExportWorkflow {
 
       // Step 4: Create Pull Request
       figma.notify('Creating pull request...', { timeout: 2000 });
-      console.log('📝 Creating pull request...');
+      // console.log('📝 Creating pull request...');
 
       const prResult = await this.prService.createPullRequest(
         repository,
@@ -500,13 +500,13 @@ export class ExportWorkflow {
         throw new Error(prResult.error || 'Failed to create pull request');
       }
 
-      console.log(`✅ Pull request #${prResult.prNumber} created!`);
+      // console.log(`✅ Pull request #${prResult.prNumber} created!`);
 
       // Step 5: Optionally trigger GitHub Actions workflow
       let workflowResult: WorkflowTriggerResult = { triggered: false };
 
       if (prDetails.workflowTrigger?.enabled) {
-        console.log('🔄 Triggering GitHub Actions workflow...');
+        // console.log('🔄 Triggering GitHub Actions workflow...');
         const triggerStart = performance.now();
 
         workflowResult = await this.triggerWorkflowSafely(
@@ -516,7 +516,7 @@ export class ExportWorkflow {
         );
 
         const triggerDuration = performance.now() - triggerStart;
-        console.log(`✅ Workflow trigger completed in ${triggerDuration.toFixed(0)}ms`);
+        // console.log(`✅ Workflow trigger completed in ${triggerDuration.toFixed(0)}ms`);
       }
 
       // Step 6: Show success
@@ -639,7 +639,7 @@ export class ExportWorkflow {
     extractionResult: ExtractionResult
   ): Promise<Omit<WorkflowResult, 'extractionResult' | 'duration'>> {
     try {
-      console.log('💾 Starting download workflow...');
+      // console.log('💾 Starting download workflow...');
 
       // Use the existing download function
       const extractionDuration = Date.now() - new Date(extractionResult.metadata.extractedAt).getTime();
@@ -874,7 +874,7 @@ export class ExportWorkflow {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async runGitHubSetup(): Promise<void> {
     try {
-      console.log('🔧 Starting GitHub setup wizard...');
+      // console.log('🔧 Starting GitHub setup wizard...');
       figma.notify('Setting up GitHub integration...', { timeout: 3000 });
 
       const setupUI = new GitHubSetupUI();

@@ -718,10 +718,10 @@ async function main(): Promise<void> {
     userFacingTimings.mainUIShown = Date.now();
     const timeToMainUI = userFacingTimings.mainUIShown - launchTime;
     const loadingScreenDuration = userFacingTimings.mainUIShown - userFacingTimings.loadingScreenShown;
-    console.log('\n' + '✨'.repeat(40));
-    console.log(`✨ MAIN UI VISIBLE after ${timeToMainUI}ms`);
-    console.log(`   (Loading screen was visible for ${loadingScreenDuration}ms)`);
-    console.log('✨'.repeat(40) + '\n');
+    // console.log('\n' + '✨'.repeat(40));
+    // console.log(`✨ MAIN UI VISIBLE after ${timeToMainUI}ms`);
+    // console.log(`   (Loading screen was visible for ${loadingScreenDuration}ms)`);
+    // console.log('✨'.repeat(40) + '\n');
 
     // console.log(`⏱️  [${timings['7_run_workflow']}ms] Workflow executed and UI shown`);
 

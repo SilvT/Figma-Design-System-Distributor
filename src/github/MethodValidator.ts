@@ -29,7 +29,7 @@ export class MethodValidator {
     const invalidMethods: string[] = [];
     const methodTypes: Record<string, string> = {};
 
-    console.log(`🔍 Validating methods on ${objectName}:`, obj);
+    // console.log(`🔍 Validating methods on ${objectName}:`, obj);
 
     // Check if object exists
     if (!obj) {
@@ -47,7 +47,7 @@ export class MethodValidator {
 
     // Get all available properties for debugging
     const availableProperties = this.getAllProperties(obj);
-    console.log(`📋 Available properties on ${objectName}:`, availableProperties);
+    // console.log(`📋 Available properties on ${objectName}:`, availableProperties);
 
     // Validate each required method
     for (const methodName of requiredMethods) {
@@ -55,7 +55,7 @@ export class MethodValidator {
       const methodType = typeof method;
       methodTypes[methodName] = methodType;
 
-      console.log(`  - ${methodName}: ${methodType}`);
+      // console.log(`  - ${methodName}: ${methodType}`);
 
       if (method === undefined || method === null) {
         missingMethods.push(methodName);
@@ -64,14 +64,14 @@ export class MethodValidator {
         invalidMethods.push(methodName);
         console.warn(`    ❌ Invalid type: ${methodName} is ${methodType}`);
       } else {
-        console.log(`    ✅ Valid: ${methodName}`);
+        // console.log(`    ✅ Valid: ${methodName}`);
 
         // Test if the method can be called (basic syntax check)
         try {
           // Check if it's an arrow function or bound method
           const isArrowFunction = method.toString().includes('=>');
           const isBound = method.name === 'bound ' + methodName;
-          console.log(`    📝 ${methodName} - Arrow: ${isArrowFunction}, Bound: ${isBound}`);
+          // console.log(`    📝 ${methodName} - Arrow: ${isArrowFunction}, Bound: ${isBound}`);
         } catch (testError) {
           console.warn(`    ⚠️ Method inspection failed for ${methodName}:`, testError);
         }
@@ -216,14 +216,14 @@ export class MethodValidator {
 
     try {
       const methodString = method.toString();
-      console.log(`    - Source length: ${methodString.length} chars`);
-      console.log(`    - Is arrow function: ${methodString.includes('=>')}`);
-      console.log(`    - Contains 'this': ${methodString.includes('this')}`);
-      console.log(`    - Is bound: ${method.name.includes('bound')}`);
+      // console.log(`    - Source length: ${methodString.length} chars`);
+      // console.log(`    - Is arrow function: ${methodString.includes('=>')}`);
+      // console.log(`    - Contains 'this': ${methodString.includes('this')}`);
+      // console.log(`    - Is bound: ${method.name.includes('bound')}`);
 
       // Try to detect if it's a native method
       const isNative = methodString.includes('[native code]');
-      console.log(`    - Is native: ${isNative}`);
+      // console.log(`    - Is native: ${isNative}`);
 
     } catch (error) {
       console.log(`    - Source inspection failed: ${error}`);
@@ -231,13 +231,13 @@ export class MethodValidator {
 
     // Test the binding
     try {
-      console.log(`  🧪 Testing method binding:`);
+      // console.log(`  🧪 Testing method binding:`);
       const unbound = obj[methodName];
       const bound = method.bind(obj);
 
-      console.log(`    - Unbound type: ${typeof unbound}`);
-      console.log(`    - Bound type: ${typeof bound}`);
-      console.log(`    - Same reference: ${unbound === method}`);
+      // console.log(`    - Unbound type: ${typeof unbound}`);
+      // console.log(`    - Bound type: ${typeof bound}`);
+      // console.log(`    - Same reference: ${unbound === method}`);
 
     } catch (error) {
       console.log(`    - Binding test failed: ${error}`);

@@ -1170,7 +1170,7 @@ export class UnifiedExportUI {
               const nameInput = document.getElementById('repo-name');
 
               if (ownerInput && nameInput && ownerInput.value && nameInput.value) {
-                console.log('🌿 Auto-validating pre-saved repository:', ownerInput.value + '/' + nameInput.value);
+                // console.log('🌿 Auto-validating pre-saved repository:', ownerInput.value + '/' + nameInput.value);
 
                 // Automatically trigger validation to fetch branches
                 setTimeout(() => {
@@ -1452,7 +1452,7 @@ export class UnifiedExportUI {
 
           // Branch dropdown population function (disabled for setup - only used in push screen)
           function populateBranchDropdown(branches) {
-            console.log('🌿 Branch dropdown disabled in setup screen - branches will be selected in push screen');
+            // console.log('🌿 Branch dropdown disabled in setup screen - branches will be selected in push screen');
             // Just set the default branch value to 'main'
             const branchInput = document.getElementById('repo-branch');
             if (branchInput) {
@@ -1526,7 +1526,7 @@ export class UnifiedExportUI {
 
                   // If validation successful and branches received, populate branch dropdown
                   if (msg.success && msg.branches) {
-                    console.log('🌿 Received branches:', msg.branches);
+                    // console.log('🌿 Received branches:', msg.branches);
                     populateBranchDropdown(msg.branches);
                   } else if (msg.success) {
                   }
@@ -2056,7 +2056,7 @@ export class UnifiedExportUI {
 
   private async handleTokenValidation(token: string): Promise<void> {
     try {
-      console.log('🔍 Validating GitHub token:', token.substring(0, 10) + '...');
+      // console.log('🔍 Validating GitHub token:', token.substring(0, 10) + '...');
 
       // Basic format validation
       if (!token.startsWith('ghp_') || token.length !== 40) {
@@ -2113,7 +2113,7 @@ export class UnifiedExportUI {
   private async handleRepositoryValidation(owner: string, name: string, branch?: string): Promise<void> {
     try {
       const branchToValidate = branch || 'main';
-      console.log('🔍 Validating repository access:', `${owner}/${name}`, `branch: ${branchToValidate}`);
+      // console.log('🔍 Validating repository access:', `${owner}/${name}`, `branch: ${branchToValidate}`);
 
       // Basic input validation
       if (!owner || !name) {
@@ -2183,11 +2183,11 @@ export class UnifiedExportUI {
 
       // Fetch available branches using direct API call
       try {
-        console.log('🌿 Starting branch fetching...');
+        // console.log('🌿 Starting branch fetching...');
         const token = this.gitConfig.credentials.token;
         const url = `https://api.github.com/repos/${owner}/${name}/branches`;
 
-        console.log('🌿 Fetching branches from:', url);
+        // console.log('🌿 Fetching branches from:', url);
         const response = await fetch(url, {
           headers: {
             'Authorization': `token ${token}`,
@@ -2202,7 +2202,7 @@ export class UnifiedExportUI {
 
         const branchData = await response.json();
         const branches = branchData.map((branch: any) => branch.name);
-        console.log('🌿 Retrieved branches:', branches);
+        // console.log('🌿 Retrieved branches:', branches);
 
         figma.ui.postMessage({
           type: 'repository-validation-result',
@@ -2271,15 +2271,15 @@ export class UnifiedExportUI {
    */
   private async handleCompleteSetup(config: GitHubConfig, saveCredentials: boolean = true): Promise<void> {
     try {
-      console.log('🎯 Completing GitHub setup with config:', config);
-      console.log('🔐 Save credentials:', saveCredentials);
+      // console.log('🎯 Completing GitHub setup with config:', config);
+      // console.log('🔐 Save credentials:', saveCredentials);
 
       // Update internal configuration
       this.gitConfig = { ...config };
 
       // Save or clear credentials based on user preference
       if (saveCredentials) {
-        console.log('💾 Saving to SecureStorage...');
+        // console.log('💾 Saving to SecureStorage...');
 
         if (config.credentials) {
           await SecureStorage.storeCredentials(config.credentials);
@@ -2294,11 +2294,11 @@ export class UnifiedExportUI {
 
       // Verify storage
       const storedConfig = await SecureStorage.getCompleteConfig();
-      console.log('🔍 Verification - Stored config:', {
-        hasCredentials: !!storedConfig?.credentials?.token,
-        hasRepository: !!storedConfig?.repository,
-        tokenPreview: storedConfig?.credentials?.token?.substring(0, 10) + '...'
-      });
+      // console.log('🔍 Verification - Stored config:', {
+      //   hasCredentials: !!storedConfig?.credentials?.token,
+      //   hasRepository: !!storedConfig?.repository,
+      //   tokenPreview: storedConfig?.credentials?.token?.substring(0, 10) + '...'
+      // });
 
       // Provide user feedback
       figma.notify('✅ GitHub configuration saved successfully!', { timeout: 3000 });

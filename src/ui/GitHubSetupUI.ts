@@ -424,12 +424,12 @@ export class GitHubSetupUI {
           }
 
           function populateBranchDropdown(branches) {
-            console.log('🌿 populateBranchDropdown called with:', branches);
+            // console.log('🌿 populateBranchDropdown called with:', branches);
             const branchInput = document.getElementById('repo-branch');
-            console.log('🌿 Found branchInput element:', branchInput, 'tagName:', branchInput?.tagName);
+            // console.log('🌿 Found branchInput element:', branchInput, 'tagName:', branchInput?.tagName);
 
             if (branchInput && branchInput.tagName === 'INPUT') {
-              console.log('🌿 Converting input to dropdown...');
+              // console.log('🌿 Converting input to dropdown...');
               // Replace input with select dropdown
               const currentValue = branchInput.value || 'main';
               const parentDiv = branchInput.parentElement;
@@ -483,7 +483,7 @@ export class GitHubSetupUI {
 
                 // If validation successful, populate branch dropdown
                 if (msg.success && msg.branches) {
-                  console.log('🌿 Received branches:', msg.branches);
+                  // console.log('🌿 Received branches:', msg.branches);
                   populateBranchDropdown(msg.branches);
                 } else if (msg.success) {
                 }
@@ -797,7 +797,7 @@ export class GitHubSetupUI {
    */
   private handleUpdate(config: Partial<GitHubConfig>, field: string, value: string): void {
     this.currentConfig = config;
-    console.log(`Updated ${field}: ${value}`);
+    // console.log(`Updated ${field}: ${value}`);
   }
 
   /**
@@ -805,7 +805,7 @@ export class GitHubSetupUI {
    */
   private async handleTokenValidation(token: string): Promise<void> {
     try {
-      console.log('🔍 Validating GitHub token:', token.substring(0, 10) + '...');
+      // console.log('🔍 Validating GitHub token:', token.substring(0, 10) + '...');
 
       // Basic format validation
       if (!token.startsWith('ghp_') || token.length !== 40) {
@@ -862,7 +862,7 @@ export class GitHubSetupUI {
       const trimmedOwner = owner?.trim() || '';
       const trimmedName = name?.trim() || '';
 
-      console.log('🔍 Validating repository access:', `${trimmedOwner}/${trimmedName}`);
+      // console.log('🔍 Validating repository access:', `${trimmedOwner}/${trimmedName}`);
 
       // Basic input validation
       if (!trimmedOwner || !trimmedName) {
@@ -918,7 +918,7 @@ export class GitHubSetupUI {
 
           const branchData = await response.json();
           const branches = branchData.map((branch: any) => branch.name);
-          console.log('🌿 Retrieved branches:', branches);
+          // console.log('🌿 Retrieved branches:', branches);
 
           figma.ui.postMessage({
             type: 'repository-validation-result',

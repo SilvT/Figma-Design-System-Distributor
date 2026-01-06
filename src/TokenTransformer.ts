@@ -89,21 +89,21 @@ export class TokenTransformer {
    * Transform raw extraction result to clean format
    */
   public transform(rawData: any): CleanTokenOutput {
-    console.log('🔄 TokenTransformer processing data:', {
-      variables: rawData.variables?.length || 0,
-      designTokens: rawData.designTokens?.length || 0
-    });
+    // console.log('🔄 TokenTransformer processing data:', {
+    //   variables: rawData.variables?.length || 0,
+    //   designTokens: rawData.designTokens?.length || 0
+    // });
 
     // Build index for alias resolution
     this.buildVariableIndex(rawData.variables || []);
 
     // Extract clean tokens from variables
     const variableTokens = this.extractCleanTokens(rawData.variables || []);
-    console.log(`✅ Extracted ${variableTokens.length} tokens from variables`);
+    // console.log(`✅ Extracted ${variableTokens.length} tokens from variables`);
 
     // Extract clean tokens from design tokens (styles)
     const styleTokens = this.extractCleanStyleTokens(rawData.designTokens || []);
-    console.log(`✅ Extracted ${styleTokens.length} tokens from styles`);
+    // console.log(`✅ Extracted ${styleTokens.length} tokens from styles`);
 
     // Combine all tokens
     const tokens = [...variableTokens, ...styleTokens];
@@ -217,7 +217,7 @@ export class TokenTransformer {
    */
   private extractCleanStyleTokens(styleTokens: any[]): CleanToken[] {
     return styleTokens.map(styleToken => {
-      console.log(`🎨 Processing style token: "${styleToken.name}" of type ${styleToken.type}`);
+      // console.log(`🎨 Processing style token: "${styleToken.name}" of type ${styleToken.type}`);
 
       // Clean color values for style tokens
       let value = styleToken.value;

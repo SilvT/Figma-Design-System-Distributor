@@ -29,7 +29,7 @@ export class GitHubClientHybrid {
     this.credentials = credentials;
     this.clientId = `hybrid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    console.log('🔧 GitHubClientHybrid constructor - Creating hybrid client with ID:', this.clientId);
+    // console.log('🔧 GitHubClientHybrid constructor - Creating hybrid client with ID:', this.clientId);
 
     // Initialize client synchronously but detect issues on first method call
     this.initializeClient();
@@ -37,14 +37,14 @@ export class GitHubClientHybrid {
 
   private initializeClient(): void {
     try {
-      console.log('🔧 GitHubClientHybrid - Attempting to create regular GitHubClient...');
+      // console.log('🔧 GitHubClientHybrid - Attempting to create regular GitHubClient...');
       this.regularClient = new GitHubClient(this.credentials);
 
       // Test if the regular client's methods work (basic synchronous check)
-      console.log('🔧 GitHubClientHybrid - Testing regular client methods...');
+      // console.log('🔧 GitHubClientHybrid - Testing regular client methods...');
       this.testClientMethods();
 
-      console.log('✅ GitHubClientHybrid - Regular client methods appear valid, will test async methods on first call');
+      // console.log('✅ GitHubClientHybrid - Regular client methods appear valid, will test async methods on first call');
       this.useStaticFallback = false;
 
     } catch (error) {
@@ -103,11 +103,11 @@ export class GitHubClientHybrid {
 
   async getUser(): Promise<GitHubUser> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.getUser - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.getUser - Using static fallback');
       return GitHubClientStatic.getUser(this.credentials);
     } else if (this.regularClient) {
       try {
-        console.log('🔄 GitHubClientHybrid.getUser - Using regular client');
+        // console.log('🔄 GitHubClientHybrid.getUser - Using regular client');
         return await this.regularClient.getUser();
       } catch (error) {
         console.warn('⚠️ GitHubClientHybrid.getUser - Regular client failed, switching to static fallback');
@@ -122,10 +122,10 @@ export class GitHubClientHybrid {
 
   async testConnection(repositoryConfig?: { owner: string; name: string }): Promise<ConnectionTestResult> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.testConnection - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.testConnection - Using static fallback');
       return GitHubClientStatic.testConnection(this.credentials, repositoryConfig);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.testConnection - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.testConnection - Using regular client');
       return this.regularClient.testConnection(repositoryConfig);
     } else {
       throw new Error('No client available');
@@ -138,10 +138,10 @@ export class GitHubClientHybrid {
 
   async getRepository(owner: string, repo: string): Promise<GitHubRepository> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.getRepository - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.getRepository - Using static fallback');
       return GitHubClientStatic.getRepository(this.credentials, owner, repo);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.getRepository - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.getRepository - Using regular client');
       return this.regularClient.getRepository(owner, repo);
     } else {
       throw new Error('No client available');
@@ -154,10 +154,10 @@ export class GitHubClientHybrid {
     per_page?: number;
   } = {}): Promise<GitHubRepository[]> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.listRepositories - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.listRepositories - Using static fallback');
       return GitHubClientStatic.listRepositories(this.credentials, options);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.listRepositories - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.listRepositories - Using regular client');
       return this.regularClient.listRepositories(options);
     } else {
       throw new Error('No client available');
@@ -170,10 +170,10 @@ export class GitHubClientHybrid {
 
   async getFile(owner: string, repo: string, path: string, ref?: string): Promise<GitHubFile> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.getFile - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.getFile - Using static fallback');
       return GitHubClientStatic.getFile(this.credentials, owner, repo, path, ref);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.getFile - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.getFile - Using regular client');
       return this.regularClient.getFile(owner, repo, path, ref);
     } else {
       throw new Error('No client available');
@@ -187,10 +187,10 @@ export class GitHubClientHybrid {
     request: CreateFileRequest
   ): Promise<{ content: GitHubFile; commit: any }> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.createFile - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.createFile - Using static fallback');
       return GitHubClientStatic.createFile(this.credentials, owner, repo, path, request);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.createFile - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.createFile - Using regular client');
       return this.regularClient.createFile(owner, repo, path, request);
     } else {
       throw new Error('No client available');
@@ -204,10 +204,10 @@ export class GitHubClientHybrid {
     request: UpdateFileRequest
   ): Promise<{ content: GitHubFile; commit: any }> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.updateFile - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.updateFile - Using static fallback');
       return GitHubClientStatic.updateFile(this.credentials, owner, repo, path, request);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.updateFile - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.updateFile - Using regular client');
       return this.regularClient.updateFile(owner, repo, path, request);
     } else {
       throw new Error('No client available');
@@ -216,11 +216,11 @@ export class GitHubClientHybrid {
 
   async fileExists(owner: string, repo: string, path: string): Promise<boolean> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.fileExists - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.fileExists - Using static fallback');
       return GitHubClientStatic.fileExists(this.credentials, owner, repo, path);
     } else if (this.regularClient) {
       try {
-        console.log('🔄 GitHubClientHybrid.fileExists - Using regular client');
+        // console.log('🔄 GitHubClientHybrid.fileExists - Using regular client');
         return await this.regularClient.fileExists(owner, repo, path);
       } catch (error) {
         console.warn('⚠️ GitHubClientHybrid.fileExists - Regular client failed, switching to static fallback');
@@ -239,10 +239,10 @@ export class GitHubClientHybrid {
 
   async pushTokens(request: TokenPushRequest): Promise<TokenPushResult> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.pushTokens - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.pushTokens - Using static fallback');
       return GitHubClientStatic.pushTokens(this.credentials, request);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.pushTokens - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.pushTokens - Using regular client');
       return this.regularClient.pushTokens(request);
     } else {
       throw new Error('No client available');
@@ -261,10 +261,10 @@ export class GitHubClientHybrid {
     inputs?: Record<string, string>
   ): Promise<{ success: boolean; error?: string }> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.triggerWorkflow - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.triggerWorkflow - Using static fallback');
       return GitHubClientStatic.triggerWorkflow(this.credentials, owner, repo, workflowId, ref, inputs);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.triggerWorkflow - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.triggerWorkflow - Using regular client');
       return this.regularClient.triggerWorkflow(owner, repo, workflowId, ref, inputs);
     } else {
       throw new Error('No client available');
@@ -282,10 +282,10 @@ export class GitHubClientHybrid {
     error?: string;
   }> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.validateTokenPermissions - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.validateTokenPermissions - Using static fallback');
       return GitHubClientStatic.validateTokenPermissions(this.credentials);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.validateTokenPermissions - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.validateTokenPermissions - Using regular client');
       return this.regularClient.validateTokenPermissions();
     } else {
       throw new Error('No client available');
@@ -299,10 +299,10 @@ export class GitHubClientHybrid {
     used: number;
   }> {
     if (this.useStaticFallback) {
-      console.log('🔄 GitHubClientHybrid.getRateLimit - Using static fallback');
+      // console.log('🔄 GitHubClientHybrid.getRateLimit - Using static fallback');
       return GitHubClientStatic.getRateLimit(this.credentials);
     } else if (this.regularClient) {
-      console.log('🔄 GitHubClientHybrid.getRateLimit - Using regular client');
+      // console.log('🔄 GitHubClientHybrid.getRateLimit - Using regular client');
       return this.regularClient.getRateLimit();
     } else {
       throw new Error('No client available');
