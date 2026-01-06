@@ -4,7 +4,7 @@
 
 Shoot your Fima Design tokens into code with one click. No technical knowledge required.
 
-[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)]()
+[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)]()
 [![Status](https://img.shields.io/badge/status-ready%20to%20use-green.svg)]()
 [![Design](https://img.shields.io/badge/made%20for-designers-purple.svg)]()
 [![Simple](https://img.shields.io/badge/setup-5%20minutes-brightgreen.svg)]()

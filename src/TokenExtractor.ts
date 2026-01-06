@@ -361,12 +361,16 @@ export class TokenExtractor {
         await this.populateVariableRegistry();
       }
 
+      console.log(`🔍 DEBUG: Starting token extraction with config:`, this.config);
+
       // Extract tokens in parallel for better performance
       const extractionPromises: Promise<any>[] = [];
 
       // Extract Figma variables (must complete before styles for proper references)
       if (this.config.includeVariables) {
+        console.log(`🔍 DEBUG: Starting variable extraction...`);
         const variablesPromise = this.extractVariables().then(({ variables, collections }) => {
+          console.log(`🔍 DEBUG: Variables extracted: ${variables.length} variables, ${collections.length} collections`);
           result.variables = variables;
           result.collections = collections;
         });
@@ -377,20 +381,25 @@ export class TokenExtractor {
       if (this.config.includeVariables) {
         await Promise.all(extractionPromises);
         extractionPromises.length = 0;
+        console.log(`🔍 DEBUG: Variable extraction completed`);
       }
 
       // Now extract styles and components in parallel (they can run independently)
       if (this.config.includeLocalStyles) {
+        console.log(`🔍 DEBUG: Starting style token extraction...`);
         extractionPromises.push(
           this.extractStyleTokens().then(styleTokens => {
+            console.log(`🔍 DEBUG: Style tokens extracted: ${styleTokens.length} tokens`);
             result.tokens.push(...styleTokens);
           })
         );
       }
 
       if (this.config.includeComponentTokens) {
+        console.log(`🔍 DEBUG: Starting component token extraction...`);
         extractionPromises.push(
           this.extractComponentTokens().then(componentTokens => {
+            console.log(`🔍 DEBUG: Component tokens extracted: ${componentTokens.length} tokens`);
             result.tokens.push(...componentTokens);
           })
         );
@@ -398,6 +407,11 @@ export class TokenExtractor {
 
       // Wait for all parallel extractions to complete
       await Promise.all(extractionPromises);
+
+      console.log(`🔍 DEBUG: All extractions completed. Final counts:`);
+      console.log(`🔍 DEBUG: - Tokens: ${result.tokens.length}`);
+      console.log(`🔍 DEBUG: - Variables: ${result.variables.length}`);
+      console.log(`🔍 DEBUG: - Collections: ${result.collections.length}`);
 
       // Update metadata
       result.metadata.processedNodes = this.processedNodes;
@@ -422,14 +436,14 @@ export class TokenExtractor {
 
     try {
       // Extract from local paint styles
-      const paintStyles = figma.getLocalPaintStyles();
+      const paintStyles = await figma.getLocalPaintStylesAsync();
 
       for (const style of paintStyles) {
         try {
           if (style.paints && style.paints.length > 0) {
           }
 
-          const colorToken = this.convertPaintStyleToColorToken(style);
+          const colorToken = await this.convertPaintStyleToColorToken(style);
           if (colorToken) {
             colorTokens.push(colorToken);
           } else {
@@ -462,11 +476,11 @@ export class TokenExtractor {
 
     try {
       // Extract from local text styles
-      const textStyles = figma.getLocalTextStyles();
+      const textStyles = await figma.getLocalTextStylesAsync();
 
       for (const style of textStyles) {
         try {
-          const typographyToken = this.convertTextStyleToTypographyToken(style);
+          const typographyToken = await this.convertTextStyleToTypographyToken(style);
           if (typographyToken) {
             typographyTokens.push(typographyToken);
           }
@@ -496,6 +510,9 @@ export class TokenExtractor {
     const spacingTokens: SpacingToken[] = [];
 
     try {
+      // In dynamic-page mode, we need to load all pages first
+      await figma.loadAllPagesAsync();
+
       // Extract from components with auto-layout
       const components = figma.root.findAll(node =>
         node.type === 'COMPONENT' || node.type === 'COMPONENT_SET'
@@ -534,11 +551,11 @@ export class TokenExtractor {
 
     try {
       // Extract from local effect styles
-      const effectStyles = figma.getLocalEffectStyles();
+      const effectStyles = await figma.getLocalEffectStylesAsync();
 
       for (const style of effectStyles) {
         try {
-          const effectToken = this.convertEffectStyleToEffectToken(style);
+          const effectToken = await this.convertEffectStyleToEffectToken(style);
           if (effectToken) {
             effectTokens.push(effectToken);
           }
@@ -576,7 +593,7 @@ export class TokenExtractor {
       const variables: VariableToken[] = [];
 
       // Get all variable collections
-      const variableCollections = figma.variables.getLocalVariableCollections();
+      const variableCollections = await figma.variables.getLocalVariableCollectionsAsync();
 
       for (const collection of variableCollections) {
         try {
@@ -607,7 +624,7 @@ export class TokenExtractor {
   /**
    * Convert Figma paint style to color token or gradient token
    */
-  private convertPaintStyleToColorToken(style: PaintStyle): ColorToken | GradientToken | null {
+  private async convertPaintStyleToColorToken(style: PaintStyle): Promise<ColorToken | GradientToken | null> {
     try {
       if (!style.paints || style.paints.length === 0) {
         this.addWarning(`Paint style ${style.name} has no paints`);
@@ -636,7 +653,7 @@ export class TokenExtractor {
           figmaNodeId: style.id
         };
       } else if (paint.type === 'GRADIENT_LINEAR' || paint.type === 'GRADIENT_RADIAL' || paint.type === 'GRADIENT_ANGULAR' || paint.type === 'GRADIENT_DIAMOND') {
-        return this.convertGradientToColorToken(style, paint);
+        return await this.convertGradientToColorToken(style, paint);
       } else if (paint.type === 'IMAGE') {
         return this.convertImageToColorToken(style, paint);
       }
@@ -680,10 +697,10 @@ export class TokenExtractor {
   /**
    * Convert gradient paint to gradient token (separate from color tokens)
    */
-  private convertGradientToColorToken(style: PaintStyle, paint: GradientPaint): GradientToken {
+  private async convertGradientToColorToken(style: PaintStyle, paint: GradientPaint): Promise<GradientToken> {
 
     // Process gradient stops - preserve variable references when available
-    const stops = paint.gradientStops.map((stop, index) => {
+    const stops = await Promise.all(paint.gradientStops.map(async (stop, index) => {
       const stopWithVars = stop as any;
 
       // Check if this stop has variable references
@@ -691,7 +708,7 @@ export class TokenExtractor {
 
       if (hasColorVariable) {
         const variableId = stopWithVars.boundVariables.color.id;
-        const variableName = this.getVariableNameById(variableId);
+        const variableName = await this.getVariableNameById(variableId);
 
         return {
           position: stop.position,
@@ -712,7 +729,7 @@ export class TokenExtractor {
           }
         };
       }
-    });
+    }));
 
     // Calculate angle for linear gradients
     let angle: number | undefined;
@@ -763,7 +780,7 @@ export class TokenExtractor {
   /**
    * Convert text style to typography token
    */
-  private convertTextStyleToTypographyToken(style: TextStyle): TypographyToken | null {
+  private async convertTextStyleToTypographyToken(style: TextStyle): Promise<TypographyToken | null> {
     try {
       // Defensive checks for typography properties
       this.log(`Processing text style: ${style.name}`);
@@ -782,7 +799,7 @@ export class TokenExtractor {
       let fontFamilyValue: any = style.fontName?.family || 'Arial';
       if (hasFontFamilyVariable) {
         const fontFamilyVariableId = styleWithVars.boundVariables.fontFamily.id;
-        const fontFamilyVariableName = this.getVariableNameById(fontFamilyVariableId);
+        const fontFamilyVariableName = await this.getVariableNameById(fontFamilyVariableId);
 
         fontFamilyValue = {
           $alias: fontFamilyVariableName || `{${fontFamilyVariableId}}`,
@@ -794,7 +811,7 @@ export class TokenExtractor {
       let fontWeightValue: any = style.fontName?.style || 'Regular';
       if (hasFontWeightVariable) {
         const fontWeightVariableId = styleWithVars.boundVariables.fontWeight.id;
-        const fontWeightVariableName = this.getVariableNameById(fontWeightVariableId);
+        const fontWeightVariableName = await this.getVariableNameById(fontWeightVariableId);
 
         
         fontWeightValue = {
@@ -816,7 +833,7 @@ export class TokenExtractor {
       let fontSizeValue: any = style.fontSize || 16;
       if (hasFontSizeVariable) {
         const fontSizeVariableId = styleWithVars.boundVariables.fontSize.id;
-        const fontSizeVariableName = this.getVariableNameById(fontSizeVariableId);
+        const fontSizeVariableName = await this.getVariableNameById(fontSizeVariableId);
 
         
         fontSizeValue = {
@@ -829,7 +846,7 @@ export class TokenExtractor {
       let lineHeightValue: any = this.convertLineHeightSafe(style.lineHeight);
       if (hasLineHeightVariable) {
         const lineHeightVariableId = styleWithVars.boundVariables.lineHeight.id;
-        const lineHeightVariableName = this.getVariableNameById(lineHeightVariableId);
+        const lineHeightVariableName = await this.getVariableNameById(lineHeightVariableId);
 
         
         lineHeightValue = {
@@ -842,7 +859,7 @@ export class TokenExtractor {
       let letterSpacingValue: any = this.convertLetterSpacingSafe(style.letterSpacing);
       if (hasLetterSpacingVariable) {
         const letterSpacingVariableId = styleWithVars.boundVariables.letterSpacing.id;
-        const letterSpacingVariableName = this.getVariableNameById(letterSpacingVariableId);
+        const letterSpacingVariableName = await this.getVariableNameById(letterSpacingVariableId);
 
         
         letterSpacingValue = {
@@ -886,7 +903,7 @@ export class TokenExtractor {
   /**
    * Convert effect style to effect token
    */
-  private convertEffectStyleToEffectToken(style: EffectStyle): EffectToken | null {
+  private async convertEffectStyleToEffectToken(style: EffectStyle): Promise<EffectToken | null> {
     try {
 
       if (!style.effects || style.effects.length === 0) {
@@ -906,7 +923,7 @@ export class TokenExtractor {
       if ('color' in effect) {
         if (hasColorVariable) {
           const colorVariableId = effectWithVars.boundVariables.color.id;
-          const colorVariableName = this.getVariableNameById(colorVariableId);
+          const colorVariableName = await this.getVariableNameById(colorVariableId);
 
           
           colorValue = {
@@ -927,7 +944,7 @@ export class TokenExtractor {
       let blurValue: any = effect.radius;
       if (hasRadiusVariable) {
         const radiusVariableId = effectWithVars.boundVariables.radius.id;
-        const radiusVariableName = this.getVariableNameById(radiusVariableId);
+        const radiusVariableName = await this.getVariableNameById(radiusVariableId);
 
         
         blurValue = {
@@ -975,7 +992,7 @@ export class TokenExtractor {
 
     for (const variableId of variableIds) {
       try {
-        const variable = figma.variables.getVariableById(variableId);
+        const variable = await figma.variables.getVariableByIdAsync(variableId);
         if (variable) {
           const variableToken = await this.convertFigmaVariableToToken(variable, collection);
           if (variableToken) {
@@ -1065,9 +1082,9 @@ export class TokenExtractor {
   /**
    * Get variable name by ID from Figma's variable registry
    */
-  private getVariableNameById(variableId: string): string | null {
+  private async getVariableNameById(variableId: string): Promise<string | null> {
     try {
-      const variable = figma.variables.getVariableById(variableId);
+      const variable = await figma.variables.getVariableByIdAsync(variableId);
       return variable?.name || null;
     } catch (error) {
       console.warn(`⚠️  Could not resolve variable ID: ${variableId}`, error);
@@ -1082,11 +1099,11 @@ export class TokenExtractor {
     const colorTokens: ColorToken[] = [];
 
     try {
-      const collections = figma.variables.getLocalVariableCollections();
+      const collections = await figma.variables.getLocalVariableCollectionsAsync();
 
       for (const collection of collections) {
         for (const variableId of collection.variableIds) {
-          const variable = figma.variables.getVariableById(variableId);
+          const variable = await figma.variables.getVariableByIdAsync(variableId);
           if (variable && variable.resolvedType === 'COLOR') {
             const colorToken = await this.convertColorVariableToToken(variable, collection);
             if (colorToken) {
@@ -1157,11 +1174,11 @@ export class TokenExtractor {
     const spacingTokens: SpacingToken[] = [];
 
     try {
-      const collections = figma.variables.getLocalVariableCollections();
+      const collections = await figma.variables.getLocalVariableCollectionsAsync();
 
       for (const collection of collections) {
         for (const variableId of collection.variableIds) {
-          const variable = figma.variables.getVariableById(variableId);
+          const variable = await figma.variables.getVariableByIdAsync(variableId);
           if (variable && variable.resolvedType === 'FLOAT' && this.isSpacingVariable(variable)) {
             const spacingToken = await this.convertSpacingVariableToToken(variable, collection);
             if (spacingToken) {
@@ -1219,6 +1236,10 @@ export class TokenExtractor {
     const tokens: BaseToken[] = [];
 
     try {
+      // In dynamic-page mode, we need to load all pages first
+      await figma.loadAllPagesAsync();
+
+      // Now we can find components across all pages
       const components = figma.root.findAll(node =>
         node.type === 'COMPONENT' || node.type === 'COMPONENT_SET'
       ) as (ComponentNode | ComponentSetNode)[];
@@ -1979,11 +2000,11 @@ export class TokenExtractor {
   private async populateVariableRegistry(): Promise<void> {
     try {
       this.log('Pre-populating variable registry...');
-      const collections = figma.variables.getLocalVariableCollections();
+      const collections = await figma.variables.getLocalVariableCollectionsAsync();
 
       for (const collection of collections) {
         for (const variableId of collection.variableIds) {
-          const variable = figma.variables.getVariableById(variableId);
+          const variable = await figma.variables.getVariableByIdAsync(variableId);
           if (variable) {
             this.registerVariable(variable);
           }

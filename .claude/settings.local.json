@@ -43,7 +43,9 @@
       "WebFetch(domain:help.figma.com)",
       "Bash(find:*)",
       "mcp__ide__getDiagnostics",
-      "WebSearch"
+      "WebSearch",
+      "Bash(node:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

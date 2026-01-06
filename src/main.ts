@@ -303,8 +303,16 @@ async function performRealExtraction(): Promise<ExtractionResult> {
     const result = await extractor.extractAllTokens();
     const extractionTime = Date.now() - startTime;
 
-    // console.log(`✓ Real extraction completed in ${extractionTime}ms`);
-    // console.log(`✓ Found ${result.tokens.length} tokens, ${result.variables.length} variables, ${result.collections.length} collections`);
+    console.log(`🔍 DEBUG: Real extraction completed in ${extractionTime}ms`);
+    console.log(`🔍 DEBUG: Found ${result.tokens.length} tokens, ${result.variables.length} variables, ${result.collections.length} collections`);
+    console.log(`🔍 DEBUG: Result object keys:`, Object.keys(result));
+
+    if (result.tokens.length === 0) {
+      console.log(`🚨 DEBUG: NO TOKENS FOUND - checking result details:`);
+      console.log(`🔍 DEBUG: result.tokens:`, result.tokens);
+      console.log(`🔍 DEBUG: result.variables:`, result.variables?.slice(0, 3) || 'undefined');
+      console.log(`🔍 DEBUG: result.collections:`, result.collections?.slice(0, 3) || 'undefined');
+    }
 
     return result;
 
@@ -353,6 +361,11 @@ export function generateSmartCommitMessage(result: ExtractionResult, documentInf
  * Create structured JSON dataset from extraction results with metadata header
  */
 function createJSONDataset(result: ExtractionResult, documentInfo: DocumentInfo, extractionDuration: number): CleanTokenOutput {
+  console.log(`🔍 DEBUG: createJSONDataset called with:`);
+  console.log(`🔍 DEBUG: result.tokens.length: ${result.tokens.length}`);
+  console.log(`🔍 DEBUG: result.variables.length: ${result.variables.length}`);
+  console.log(`🔍 DEBUG: result.collections.length: ${result.collections.length}`);
+
   // Transform to clean format
   const transformer = new TokenTransformer();
   const timestamp = new Date().toISOString();
@@ -373,7 +386,16 @@ function createJSONDataset(result: ExtractionResult, documentInfo: DocumentInfo,
     designTokens: result.tokens
   };
 
+  console.log(`🔍 DEBUG: rawData prepared for transformer:`);
+  console.log(`🔍 DEBUG: rawData.variables.length: ${rawData.variables?.length || 'undefined'}`);
+  console.log(`🔍 DEBUG: rawData.designTokens.length: ${rawData.designTokens?.length || 'undefined'}`);
+  console.log(`🔍 DEBUG: rawData.collections.length: ${rawData.collections?.length || 'undefined'}`);
+
   const transformed = transformer.transform(rawData);
+
+  console.log(`🔍 DEBUG: transformer.transform result:`);
+  console.log(`🔍 DEBUG: transformed.collections keys:`, Object.keys(transformed.collections || {}));
+  console.log(`🔍 DEBUG: transformed.source:`, transformed.source);
 
   // Add metadata header for better commit tracking
   transformed._metadata = {

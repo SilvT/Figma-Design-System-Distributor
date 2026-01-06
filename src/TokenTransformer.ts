@@ -89,30 +89,40 @@ export class TokenTransformer {
    * Transform raw extraction result to clean format
    */
   public transform(rawData: any): CleanTokenOutput {
-    // console.log('🔄 TokenTransformer processing data:', {
-    //   variables: rawData.variables?.length || 0,
-    //   designTokens: rawData.designTokens?.length || 0
-    // });
+    console.log('🔍 DEBUG: TokenTransformer.transform() called with:', {
+      variables: rawData.variables?.length || 0,
+      designTokens: rawData.designTokens?.length || 0,
+      collections: rawData.collections?.length || 0
+    });
 
     // Build index for alias resolution
     this.buildVariableIndex(rawData.variables || []);
 
     // Extract clean tokens from variables
     const variableTokens = this.extractCleanTokens(rawData.variables || []);
-    // console.log(`✅ Extracted ${variableTokens.length} tokens from variables`);
+    console.log(`🔍 DEBUG: Extracted ${variableTokens.length} tokens from variables`);
 
     // Extract clean tokens from design tokens (styles)
     const styleTokens = this.extractCleanStyleTokens(rawData.designTokens || []);
-    // console.log(`✅ Extracted ${styleTokens.length} tokens from styles`);
+    console.log(`🔍 DEBUG: Extracted ${styleTokens.length} tokens from styles`);
 
     // Combine all tokens
     const tokens = [...variableTokens, ...styleTokens];
+    console.log(`🔍 DEBUG: Combined total tokens: ${tokens.length}`);
+
+    if (tokens.length === 0) {
+      console.log(`🚨 DEBUG: NO TOKENS after combination - investigating:`);
+      console.log(`🔍 DEBUG: rawData.variables sample:`, rawData.variables?.slice(0, 2));
+      console.log(`🔍 DEBUG: rawData.designTokens sample:`, rawData.designTokens?.slice(0, 2));
+    }
 
     // Consolidate typography tokens
     const consolidatedTokens = this.consolidateTypography(tokens);
+    console.log(`🔍 DEBUG: After consolidation: ${consolidatedTokens.length} tokens`);
 
     // Organize hierarchically
     const organized = this.organizeHierarchically(consolidatedTokens);
+    console.log(`🔍 DEBUG: Organized into collections:`, Object.keys(organized));
 
     // Create final output
     return {
